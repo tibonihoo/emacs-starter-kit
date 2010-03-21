@@ -100,5 +100,9 @@
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
 
+
+;; Jump to a given line number
+(global-set-key "\M-g" 'goto-line)
+
 (provide 'starter-kit-bindings)
 ;;; starter-kit-bindings.el ends here

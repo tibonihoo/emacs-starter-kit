@@ -68,7 +68,7 @@
 
 ;;; Enhance Lisp Modes
 
-(eval-after-load 'paredit-mode
+(eval-after-load 'paredit
   ;; need a binding that works over SSH
   '(define-key paredit-mode-map (kbd "M-)") 'paredit-forward-slurp-sexp))
 

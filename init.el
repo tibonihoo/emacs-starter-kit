@@ -47,7 +47,8 @@
 (package-initialize)
 (require 'starter-kit-elpa)
 
-(load "elpa-to-submit/nxhtml/autostart")
+;; Seriously: it's taking >1s just to register autostarts ???
+;; (load "elpa-to-submit/nxhtml/autostart")
 
 ;; Load up starter kit customizations
 
@@ -60,6 +61,8 @@
 (require 'starter-kit-perl)
 (require 'starter-kit-ruby)
 (require 'starter-kit-js)
+(require 'starter-kit-python)
+(require 'starter-kit-completion)
 
 (regen-autoloads)
 (load custom-file 'noerror)
