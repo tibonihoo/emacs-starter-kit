@@ -39,11 +39,30 @@
   (set-default 'ac-sources
                '(
                  ac-source-words-in-buffer
-                 ac-source-symbols
                  ac-source-abbrev
                  ac-source-dabbrev
                  ))
-  
+  ;; set here the completion for emacs-lisp, 'cause in a sense it's a
+  ;; generic setting within emacs ;)
+  (add-hook 'emacs-lisp-mode-hook
+	    (lambda ()
+	      (setq ac-sources
+                    '(
+                      ac-source-symbols
+                      ac-source-words-in-buffer
+                      ac-source-abbrev
+                      ac-source-dabbrev
+                      ))))
+  ;; set also the completion for eshell  
+  (add-hook 'eshell-mode-hook
+	    (lambda ()
+	      (setq ac-sources
+                    '(
+                      ac-source-files-in-current-dir
+                      ac-source-words-in-buffer
+                      ac-source-abbrev
+                      ac-source-dabbrev
+                      ))))
   ;; custom keybindings to use tab, enter and up and down arrows
   (define-key ac-complete-mode-map "\t" 'ac-expand)
   (define-key ac-complete-mode-map "\r" 'ac-complete)
