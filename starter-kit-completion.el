@@ -20,49 +20,36 @@
 
 (setq hippie-expand-try-functions-list
       '(
-        yas/hippie-try-expand
+        try-expand-dabbrev-visible
+	try-expand-dabbrev
 	try-expand-dabbrev-all-buffers
+	try-expand-dabbrev-from-kill
+	try-expand-all-abbrevs
+	try-complete-file-name-partially
+	try-complete-file-name
+	try-complete-lisp-symbol-partially
+	try-complete-lisp-symbol
+	try-expand-whole-kill
         ))
 
 (global-set-key (kbd "C-/") 'hippie-expand)
 
 
+(defun ac-eshell-mode-setup ()
+  (add-to-list 'ac-sources 'ac-source-files-in-current-dir))
 
 ;; Live completion with auto-complete
-;; (
-(when (require 'auto-complete nil t)
+;; (see http://cx4a.org/software/auto-complete/)
+(when (require 'auto-complete-config nil t)
   (require 'ac-dabbrev)  
   (global-auto-complete-mode t)
-  (setq ac-auto-start 3)
+  (setq ac-auto-start .5)
+  (setq ac-quick-help-delay 0.5)
   ;; Do What I Mean mode
   (setq ac-dwim t)
-  (set-default 'ac-sources
-               '(
-                 ac-source-words-in-buffer
-                 ac-source-abbrev
-                 ac-source-dabbrev
-                 ))
-  ;; set here the completion for emacs-lisp, 'cause in a sense it's a
-  ;; generic setting within emacs ;)
-  (add-hook 'emacs-lisp-mode-hook
-	    (lambda ()
-	      (setq ac-sources
-                    '(
-                      ac-source-symbols
-                      ac-source-words-in-buffer
-                      ac-source-abbrev
-                      ac-source-dabbrev
-                      ))))
+  (ac-config-default)
   ;; set also the completion for eshell  
-  (add-hook 'eshell-mode-hook
-	    (lambda ()
-	      (setq ac-sources
-                    '(
-                      ac-source-files-in-current-dir
-                      ac-source-words-in-buffer
-                      ac-source-abbrev
-                      ac-source-dabbrev
-                      ))))
+  (add-hook 'eshell-mode-hook 'ac-eshell-mode-setup)
   ;; custom keybindings to use tab, enter and up and down arrows
   (define-key ac-complete-mode-map "\t" 'ac-expand)
   (define-key ac-complete-mode-map "\r" 'ac-complete)

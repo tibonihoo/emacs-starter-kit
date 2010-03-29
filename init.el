@@ -23,6 +23,7 @@
 (add-to-list 'load-path dotfiles-dir)
 (add-to-list 'load-path (concat dotfiles-dir "/elpa-to-submit"))
 (add-to-list 'load-path (concat dotfiles-dir "/elpa-to-submit/jabber"))
+(add-to-list 'load-path (concat dotfiles-dir "/elpa-to-submit/auto-complete"))
 
 (setq autoload-file (concat dotfiles-dir "loaddefs.el"))
 (setq package-user-dir (concat dotfiles-dir "elpa"))
@@ -50,11 +51,8 @@
 (package-initialize)
 (require 'starter-kit-elpa)
 
-;; Seriously: it's taking >1s just to register autostarts ???
-;; (load "elpa-to-submit/nxhtml/autostart")
 
 ;; Load up starter kit customizations
-
 (require 'starter-kit-defuns)
 (require 'starter-kit-bindings)
 (require 'starter-kit-misc)
@@ -66,6 +64,8 @@
 (require 'starter-kit-js)
 (require 'starter-kit-python)
 (require 'starter-kit-completion)
+(require 'starter-kit-latex)
+
 
 (regen-autoloads)
 (load custom-file 'noerror)

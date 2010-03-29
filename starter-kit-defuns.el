@@ -217,14 +217,81 @@ Symbols matching the text at point are put first in the completion list."
   (interactive)
   (message "%s" (point)))
 
-(defun toggle-fullscreen ()
-  (interactive)
-  ;; TODO: this only works for X. patches welcome for other OSes.
-  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                         '(2 "_NET_WM_STATE_MAXIMIZED_VERT" 0))
-  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                         '(2 "_NET_WM_STATE_MAXIMIZED_HORZ" 0)))
 
+;; -----------------------------------------------------------------------------
+;; Size manipulation
+;; -----------------------------------------------------------------------------
+;; see http://www.emacsblog.org/2007/02/22/maximize-on-startup-part-2/ for better stuff
+
+(defun frame-set-fullscreen (&optional f)
+  "Makes the frame as big as possible"
+  (interactive)
+  ;; under Windows
+  (if (eq system-type 'windows-nt)
+      (progn
+	(w32-send-sys-command #xf030) ;; from Windows WM_SYSCOMMAND : SC_MAXIMIZE
+	)
+    (progn 
+      ;; just resize and move the window
+      (set-frame-width f 317)
+      (set-frame-height f 57)
+      (set-frame-position f 0 0)
+      (condition-case err
+	  ;; talk to X directly (from http://www.emacswiki.org/emacs/FullScreen#toc2)
+	  (x-send-client-message f 0 nil "_NET_WM_STATE" 32
+				 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
+	;; default to internal method
+	(set-frame-parameter f 'fullscreen 'fullboth)
+	)
+      )
+    )
+  (setq frame-is-set-to-custom-size nil)
+  )
+
+
+(defun frame-set-custom-size (&optional f)
+  "Make the frame as wide as possible (useful for dual displays, site to be adapted)"
+  (interactive)
+  (if (not f)
+      (setq f (selected-frame))
+      )
+  (if (eq system-type 'windows-nt)
+      (progn
+	(w32-send-sys-command #xf120) ;; from Windows WM_SYSCOMMAND : SC_RESTORE
+	(set-frame-height f 57)
+	(set-frame-position f 0 -1)
+	(set-frame-width f 317)
+	)
+    (progn 
+      (set-frame-width f 82)
+      ;; default to internal method with default size
+      (set-frame-height f 60)
+      ;; try something I prefer, but which might not be doable on all
+      ;; systems (at least no in this precise way)
+      (condition-case err
+	  ;; talk to X directly to try to get the fullavailable screen height 
+	  (x-send-client-message f 0 nil "_NET_WM_STATE" 32
+				 '(2 "_NET_WM_STATE_MAXIMIZED_VERT" 0))
+	;; default to internal method
+	(set-frame-parameter f 'fullscreen 'fullheight)
+ 	)
+      )
+    )
+  (setq frame-is-set-to-custom-size t)
+  )
+
+;; Init the flag to whatever, it will be changed as soon as one of the
+;; two above function is called.
+(setq frame-is-set-to-custom-size nil)
+
+(defun toggle-fullscreen ()
+  "Switch between the fullscreen and custom sized frames"
+  (interactive)
+  (if frame-is-set-to-custom-size
+      (frame-set-fullscreen)
+    (frame-set-custom-size)
+    )
+  )
 
 ;; A monkeypatch to cause annotate to ignore whitespace
 (defun vc-git-annotate-command (file buf &optional rev)

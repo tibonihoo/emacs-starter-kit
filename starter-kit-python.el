@@ -4,7 +4,6 @@
 
 (eval-after-load 'python
   '(progn
-     (add-hook 'python-mode-hook 'inf-python-keys)
      (define-key python-mode-map (kbd "C-m") 'newline-and-indent)
      (define-key python-mode-map (kbd "C-M-h") 'backward-kill-word)
      (define-key python-mode-map (kbd "C-c l") "lambda")))
@@ -18,8 +17,41 @@
 (add-hook 'python-mode-hook 'idle-highlight)
 
 
-;;; Flymake
+;; Pymacs (http://pymacs.progiciels-bpi.ca/index.html)
+;; Makes it possible to interface emacs lisp with some python code.
+(autoload 'pymacs-apply "pymacs")
+(autoload 'pymacs-call "pymacs")
+(autoload 'pymacs-eval "pymacs" nil t)
+(autoload 'pymacs-exec "pymacs" nil t)
+(autoload 'pymacs-load "pymacs" nil t)
+(eval-after-load 'pymacs
+  '(progn
+     (add-to-list 'pymacs-load-path
+                  (concat dotfiles-dir "/elpa-to-submit/pymacs/lib"))
+     (add-to-list 'load-path
+                  (concat dotfiles-dir "/elpa-to-submit/pymacs/lib"))
+     ))
 
+
+;; Ropemacs (http://rope.sourceforge.net/ropemacs.html)
+;; To get some live (intelligent) completion, documentation and
+;; refactoring function.
+(add-hook 'python-mode-hook 'ac-ropemacs-setup)
+(eval-after-load 'python
+  '(progn
+     ;; Setup auto-complete to use Rope
+     (ac-ropemacs-enable) 
+     (setq ropemacs-enable-autoimport t)
+     (setq ropemacs-enable-shortcuts nil)
+     (setq ropemacs-guess-project t)
+     ;; A little more customisation for ropemacs
+     (ropemacs-mode)
+     (define-key python-mode-map "\C-cds" 'rope-show-doc)
+     ))
+
+
+;;; Flymake
+;; ~Static code checking
 (eval-after-load 'python
   '(progn
      (require 'flymake)
@@ -43,10 +75,10 @@
      (add-to-list 'flymake-allowed-file-name-masks 
                   '("\\.py\\'" flymake-pyflakes-init))
      ;; navigate errors returned by flymake
-     (define-key python-mode-map "\C-c\C-v" 'my-flymake-show-next-error)
+     (define-key python-mode-map "\C-c\C-v" 'flymake-goto-next-error)
      ))
-
 (add-hook 'python-mode-hook 'flymake-mode)
+
 
 
 (provide 'starter-kit-python)
