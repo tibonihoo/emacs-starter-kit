@@ -301,5 +301,7 @@ function will just reindent the region.
 				(indent-region begin-point end-point nil))))
 		(indent-region (region-beginning) (region-end) nil))))
 
+(provide 'sourcepair)
+
 ;;; sourcepair.el ends here
 
