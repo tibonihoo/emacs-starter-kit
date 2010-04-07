@@ -306,6 +306,23 @@
 ;; -----------------------------------------------------------------------------
 ;; C/C++ personal config
 ;;-----------------------------------------------------------------------------
+
+;; .h are also C++
+(setq auto-mode-alist (cons '("\\.h\\'" . c++-mode) auto-mode-alist))
+
+(eval-after-load 'cc-mode
+  '(progn     
+     ;; Custom snippets (require 'yasnippet)
+     (yas/define-snippets 'c++-mode
+                          '(
+                            ("tnc" "// TN: NOCOMMIT" "no commit" nil)
+                            ))
+     (yas/define-snippets 'c-mode
+                          '(
+                            ("tnc" "/* TN: NOCOMMIT */" "no commit" nil)
+                            ))
+     ))
+
 (add-hook 'c-mode-common-hook
 	  '(lambda () 
 	     ;; Enable "hungry delete":
