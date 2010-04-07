@@ -128,7 +128,7 @@
   (require 'ecb-autoloads)
 )
 
-(provide 'c-like-dr-style)
+(provide 'cc-dr-style)
 
 ;; Automatic byte compiling (from Jesper Kjær Pedersen <blackie@imada.ou.dk>)
 ;;; Local Variables: ***

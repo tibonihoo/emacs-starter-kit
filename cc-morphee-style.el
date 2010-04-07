@@ -125,7 +125,7 @@
   (require 'ecb-autoloads)
 )
 
-(provide 'morphee-c-style)
+(provide 'cc-morphee-style)
 
 ;; Automatic byte compiling (from Jesper Kjær Pedersen <blackie@imada.ou.dk>)
 ;;; Local Variables: ***
