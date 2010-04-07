@@ -65,6 +65,7 @@
 (require 'starter-kit-python)
 (require 'starter-kit-completion)
 (require 'starter-kit-latex)
+(require 'starter-kit-cc)
 
 
 (regen-autoloads)
