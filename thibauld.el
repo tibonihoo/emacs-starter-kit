@@ -317,8 +317,27 @@
        )
      ))
 
+
 ;; -----------------------------------------------------------------------------
-;; LaTeX personal confirm-kill-emacs
+;; C/C++ personal config
+;;-----------------------------------------------------------------------------
+(add-hook 'c-mode-common-hook
+	  '(lambda () 
+	     ;; Enable "hungry delete":
+	     ;; use: 
+	     ;;    *backspace deletes all contiguous blank spaces in one stroke; 
+	     ;;    * C-d performs an "usual" backspace.
+	     ;;
+	     (c-toggle-hungry-state 1)
+             ;; Use custom c/c++ style
+             (require 'cc-morphee-style)
+             (morphee-style)
+             (require 'doxymacs-morphee-style)
+             ))
+
+
+;; -----------------------------------------------------------------------------
+;; LaTeX personal config
 ;; -----------------------------------------------------------------------------
 (eval-after-load 'reftex
   ;; Set the path to my biblio files according to my machine

@@ -304,7 +304,62 @@
      ))
 
 ;; -----------------------------------------------------------------------------
-;; LaTeX personal confirm-kill-emacs
+;; C/C++ personal config
+;;-----------------------------------------------------------------------------
+(add-hook 'c-mode-common-hook
+	  '(lambda () 
+	     ;; Enable "hungry delete":
+	     ;; use: 
+	     ;;    *backspace deletes all contiguous blank spaces in one stroke; 
+	     ;;    * C-d performs an "usual" backspace.
+	     ;;
+	     (c-toggle-hungry-state 1)
+             ;; Use custom c/c++ style
+             (require 'cc-dr-style)
+             (dr-style)
+             (require 'doxymacs-dr-style)
+             ;;
+             ;; Add a new function for doxygen comments
+             (defun doxymacs-insert-subgrouping-comments (start end)
+               "Inserts doxygen subgrouping comments around the current region."
+               (interactive "*r")
+               (let* (
+                      (groupname 
+                       (read-from-minibuffer "Enter name of the subgroup: "))
+                      (starter-template '(
+                                          "   /*!" > n
+                                          "    * " (doxymacs-doxygen-command-char) "name " groupname > n
+                                          "    * " > n
+                                          "    * @{" > n
+                                          "    */" > n n
+                                          ))
+                      (ender-template '( n "   // doxysubgroup: " groupname > n
+                                           "   //! @} " n
+                                           ))
+                      )
+                 (save-excursion
+                   (goto-char end)
+                   (end-of-line)
+                   ;;       (insert ender)
+                   (tempo-insert-template 'ender-template tempo-insert-region)
+                   (goto-char start)
+                   (beginning-of-line)
+                   (tempo-insert-template 'starter-template tempo-insert-region)
+                   ;;       (insert starter)
+                   )))
+             ;; (Re)define some keybindings
+             ;; Groups ("g" is easier than @ on fr kbds)
+             (define-key doxymacs-mode-map "\C-cdg"
+               'doxymacs-insert-grouping-comments)
+             ;; Subgroupiong with the  @name command
+             (define-key doxymacs-mode-map "\C-cdn" 
+               'doxymacs-insert-subgrouping-comments)
+             ))
+
+
+  
+;; -----------------------------------------------------------------------------
+;; LaTeX personal config
 ;; -----------------------------------------------------------------------------
 (eval-after-load 'reftex
   ;; Set the path to my biblio files according to my machine
