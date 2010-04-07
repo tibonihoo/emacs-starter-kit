@@ -110,7 +110,7 @@
 		    (cond
  		       ((string= doxymacs-doxygen-style "morphee")
 			(concat
-			 "//!@} doxygroup: "
+			 "//! @} doxygroup: "
 			 groupname ))
 		       (t
 			(doxymacs-invalid-style))))))

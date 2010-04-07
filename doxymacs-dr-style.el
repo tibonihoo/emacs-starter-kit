@@ -25,7 +25,7 @@
 ;; -------------------------------------------------------------------------------
 
 (defconst doxymacs-dr-blank-multiline-comment-template
- '("/*! " > n "* @brief " p > n "* " > n "*/" > n >)
+ '("/** " > n "* @brief " p > n "* " > n "*/" > n >)
  "Default dr-style template for a blank multiline doxygen comment.")
 
 (defconst doxymacs-dr-blank-singleline-comment-template
@@ -33,7 +33,7 @@
  "Default dr-style template for a blank single line doxygen comment.")
 
 (defconst doxymacs-dr-file-comment-template
- '("/*!" > n
+ '("/**" > n
    " * " (doxymacs-doxygen-command-char) "file   "
    (if (buffer-file-name)
        (file-name-nondirectory (buffer-file-name))
@@ -55,7 +55,7 @@
      (if next-func
 	 (list
 	  'l
-	  "/*!" '> 'n
+	  "/**" '> 'n
 	  " * @brief " 'p '> 'n
 	  " * " '> 'n
 	  ;; " * " '> 'n
@@ -123,7 +123,7 @@
 ;; 			"//@{")
 		       ((string= doxymacs-doxygen-style "dr")
 			(concat 
-			 "/*!\n * @addtogroup "
+			 "/**\n * @addtogroup "
 			 groupname
 			 "\n *\n *@{\n */"))
 		       (t
@@ -140,7 +140,7 @@
 ;; 			"//@}")
 		       ((string= doxymacs-doxygen-style "dr")
 			(concat
-			 "//!@} doxygroup: "
+			 "//! @} doxygroup: "
 			 groupname ))
 		       (t
 			(doxymacs-invalid-style))))))
