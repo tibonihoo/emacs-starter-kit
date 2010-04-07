@@ -12,9 +12,13 @@
 ;; We never want to edit compiled filed in python mode
 (add-to-list 'completion-ignored-extensions ".pyc")
 
+(defun ac-python-mode-setup ()
+  (setq ac-sources (append '(ac-source-yasnippet) ac-sources)))
+
 
 (add-hook 'python-mode-hook 'run-coding-hook)
 (add-hook 'python-mode-hook 'idle-highlight)
+(add-hook 'python-mode-hook 'ac-python-mode-setup)
 
 
 ;; Pymacs (http://pymacs.progiciels-bpi.ca/index.html)
@@ -33,21 +37,19 @@
      ))
 
 
-;; Ropemacs (http://rope.sourceforge.net/ropemacs.html)
-;; To get some live (intelligent) completion, documentation and
-;; refactoring function.
-(add-hook 'python-mode-hook 'ac-ropemacs-setup)
-(eval-after-load 'python
-  '(progn
-     ;; Setup auto-complete to use Rope
-     (ac-ropemacs-enable) 
-     (setq ropemacs-enable-autoimport t)
-     (setq ropemacs-enable-shortcuts nil)
-     (setq ropemacs-guess-project t)
-     ;; A little more customisation for ropemacs
-     (ropemacs-mode)
-     (define-key python-mode-map "\C-cds" 'rope-show-doc)
-     ))
+;; ;; Ropemacs (http://rope.sourceforge.net/ropemacs.html)
+;; ;; To get some live (intelligent) completion, documentation and
+;; ;; refactoring function.
+;; (eval-after-load 'python
+;;   '(progn
+;;      ;; Setup auto-complete to use Rope
+;;      (ac-ropemacs-enable) 
+;;      (setq ropemacs-enable-autoimport t)
+;;      (setq ropemacs-enable-shortcuts nil)
+;;      (setq ropemacs-guess-project t)
+;;      (add-hook 'python-mode-hook 'ropemacs-mode)
+;;      (define-key python-mode-map "\C-cds" 'rope-show-doc)
+;;      ))
 
 
 ;;; Flymake
