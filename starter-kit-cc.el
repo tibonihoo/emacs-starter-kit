@@ -28,9 +28,25 @@
   '(progn
      (define-key c-mode-base-map (kbd "C-m") 'newline-and-indent)
      (define-key c-mode-base-map (kbd "C-M-h") 'backward-kill-word)
+     ;; navigation between corresponding header and source files
      (require 'sourcepair)
      (setq sourcepair-recurse-ignore  (append sourcepair-recurse-ignore '(".svn" ".hg" ".git" )))
-     (define-key c-mode-base-map (kbd "C-co") 'sourcepair-load)
+     (setq sourcepair-source-path  (append sourcepair-source-path '("../src" "../source" "./src" "./source" "../*")))
+     (setq sourcepair-header-path  (append sourcepair-header-path '("../include" "../inc" "../*")))
+     (define-key c-mode-base-map (kbd "C-c o") 'sourcepair-load)
+     ;; Doxygen help (but don't fail if doxymacs cannot be found)
+     (condition-case err
+         (require 'doxymacs)
+       (error
+        (progn
+          (message "WARNING: Plain doxymacs cannot be loaded, using the light version.")
+          (require 'doxymacs-light)
+          (setq doxymacs-use-external-xml-parser nil)
+          )
+        )
+       )
+     (add-hook 'c-mode-hook 'doxymacs-mode)
+     (add-hook 'c++-mode-hook 'doxymacs-mode)
      ))
 
 
@@ -52,27 +68,8 @@
 	     ;;    *S-Mouse-2 hide/show a block
 	     (hs-minor-mode t)
 	     ;;
-	     ;; Tells in which function you are
+	     ;; Display in which function you are
 	     (which-function-mode)
-	     ;;
-	     ;; Doxygen help (but don't fail if doxymacs cannot be found)
-	     (condition-case err
-                 (progn
-                   (if (eq system-type 'windows-nt)
-                       ;; not all functionalities work nicely on windows 
-                       (require 'doxymacs-light)
-                     (require 'doxymacs)
-                     )
-                   ;; set this to true if you have compiled to
-                   ;; required external parser...
-                   (setq doxymacs-use-external-xml-parser nil)
-                   (doxymacs-mode)
-                   (doxymacs-font-lock)
-                   )
-	       (error
-		(message "ERROR: Cannot activate doxymacs mode." (cdr err))
-		)
-	       )
              );; end of c-mode-common-hook
           )
 
@@ -81,7 +78,11 @@
           '(lambda ()
              ;; Fontify doxygen comments in C and C++ modes only.
              (if (or (eq major-mode 'c-mode) (eq major-mode 'c++-mode))
-                 (doxymacs-font-lock)
+                  (condition-case err
+                      (doxymacs-font-lock)
+                    (error
+                     (message "ERROR: Cannot set font decoration for doxygen comments "))
+                    )
                )
              ))
 
