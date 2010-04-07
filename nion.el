@@ -327,7 +327,7 @@
                       (groupname 
                        (read-from-minibuffer "Enter name of the subgroup: "))
                       (starter-template '(
-                                          "   /*!" > n
+                                          "   /**" > n
                                           "    * " (doxymacs-doxygen-command-char) "name " groupname > n
                                           "    * " > n
                                           "    * @{" > n
