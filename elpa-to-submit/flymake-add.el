@@ -1,6 +1,9 @@
 ;; -*- emacs-lisp -*-
 ;; License: Gnu Public License
 ;;
+
+;; Taken from: http://paste.lisp.org/display/60617#1
+;;
 ;; Additional functionality that makes flymake error messages appear
 ;; in the minibuffer when point is on a line containing a flymake
 ;; error. This saves having to mouse over the error, which is a
@@ -43,7 +46,6 @@ it)"
 (set (make-local-variable 'post-command-hook)
      (cons 'show-fly-err-at-point post-command-hook))
 )
-
 
 
 (provide 'flymake-add)
