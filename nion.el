@@ -217,8 +217,18 @@
 ;; -----------------------------------------------------------------------------
 
 ;; Flymake additional functionalities
-(require 'flymake-add)
+(eval-after-load 'flymake
+  '(progn
+     (require 'flymake-add)
+     ))
 
+(add-hook 'flymake-mode-hook
+          '(lambda ()
+             (local-set-key (kbd "M-n") 'flymake-goto-next-error)
+             (local-set-key (kbd "M-p") 'flymake-goto-prev-error)
+             ))
+
+  
 
 ;; -----------------------------------------------------------------------------
 ;; Python personal config
@@ -244,8 +254,6 @@
                           )
      ;; imenu settings: also show function's args
      (setq py-imenu-show-method-args-p t)
-     ;; navigate errors returned by flymake
-     (define-key python-mode-map "\C-c\C-v" 'my-flymake-show-next-error)
      ;; A simple way to lookup a subject (so long as you're connected
      ;; to internet, else you can still use C-c C-f
      (defun python-search-www ()
