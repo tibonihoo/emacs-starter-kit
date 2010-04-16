@@ -278,6 +278,82 @@
          (browse-url weburl)
          )
        )
+     (defun python-runtests (&optional additional-runtest-args)
+       "Run the closest RunTests.py in the file hierarchy."
+       (let  ( 
+              ;; the directory where the RunTests.py file should be located (if any)
+              test-script-parent-directory 
+              ;; the full path to the RunTests.py file (if it exists)
+              test-script-file
+              ;; remember in which directory the function is run
+              (saved-default-directory default-directory)
+              )
+         ;; lookup for the directory containing the closest RunTest.py (in
+         ;; the file hierarchy).
+         (setq test-script-parent-directory 
+               (locate-dominating-file 
+                (directory-file-name (expand-file-name default-directory))
+                "RunTests.py"
+                )
+               )
+         (if test-script-parent-directory
+             (progn
+               (setq test-script-parent-directory (expand-file-name test-script-parent-directory))
+               (setq test-script-file (concat test-script-parent-directory "/RunTests.py"))
+               ;; bullet proofize against windows "\" vs "/" plague
+               (if (eq system-type 'windows-nt)
+                   (progn
+                     (setq test-script-file
+                           (replace-regexp-in-string "/" "\\\\" test-script-file ))
+                     )
+                 )
+               ;; jump to RunTests.py's directory to launch it properly
+               (cd test-script-parent-directory)
+               (if additional-runtest-args
+                   (compile (concat "python " test-script-file " " additional-runtest-args))
+                 (compile (concat "python " test-script-file))
+                 )
+               ;; restore the initial directory
+               (cd saved-default-directory)
+               )
+           ;; a message in case of error
+           (message "RunTests.py not found, unit test cannot be launched !")
+           )
+         )
+       )
+
+     (defun python-test-all ()
+       "Call RunTests.py to launch all avaiable tests. Usefull when
+you are inside a directory hierachy on top of which there is a
+RunTests.py script and all the more if you work in a testXXX
+file. "
+       (interactive)
+       (python-runtests)
+       )
+
+     (defun python-test-this ()
+       "Call RunTests.py for this file only, usefull only when working
+in a 'testXXX' file"
+       (interactive)
+       (let (filenametrunk)
+         (setq filenametrunk
+               (file-name-nondirectory
+                (file-name-sans-extension buffer-file-name)
+                )
+               )
+         (python-runtests (concat "--run_test=" filenametrunk))
+         )
+       )
+
+     (defun python-test-select (test-name)
+       "Call RunTests.py for a given test only. Usefull when you are
+inside a directory hierachy on top of which there is a
+RunTests.py script and all the more if you work in a testXXX
+file. "
+       (interactive)
+       (python-runtests (concat "--run_test=" test-name))
+       )
+     (define-key python-mode-map "\C-xt" 'python-test-this)
      (condition-case err
          (progn
            ;; Doxygen mode
@@ -692,81 +768,6 @@ select the source buffer."
    )
   )
 
-(defun python-runtests (&optional additional-runtest-args)
-  "Run the closest RunTests.py in the file hierarchy."
-  (let  ( 
-	 ;; the directory where the RunTests.py file should be located (if any)
-	 test-script-parent-directory 
-	 ;; the full path to the RunTests.py file (if it exists)
-	 test-script-file
-	 ;; remember in which directory the function is run
-	 (saved-default-directory default-directory)
-	 )
-    ;; lookup for the directory containing the closest RunTest.py (in
-    ;; the file hierarchy).
-    (setq test-script-parent-directory 
-	  (locate-dominating-file 
-	   (directory-file-name (expand-file-name default-directory))
-	   "RunTests.py"
-	   )
-	  )
-    (if test-script-parent-directory
-	(progn
-	  (setq test-script-parent-directory (expand-file-name test-script-parent-directory))
-	  (setq test-script-file (concat test-script-parent-directory "/RunTests.py"))
-	  ;; bullet proofize against windows "\" vs "/" plague
-	  (if (eq system-type 'windows-nt)
-	      (progn
-		(setq test-script-file
-		      (replace-regexp-in-string "/" "\\\\" test-script-file ))
-		)
-	    )
-	  ;; jump to RunTests.py's directory to launch it properly
-	  (cd test-script-parent-directory)
-	  (if additional-runtest-args
-	      (compile (concat "python " test-script-file " " additional-runtest-args))
-	    (compile (concat "python " test-script-file))
-	    )
-	  ;; restore the initial directory
-	  (cd saved-default-directory)
-	  )
-      ;; a message in case of error
-      (message "RunTests.py not found, unit test cannot be launched !")
-      )
-    )
-  )
-
-(defun python-test-all ()
-  "Call RunTests.py to launch all avaiable tests. Usefull when
-you are inside a directory hierachy on top of which there is a
-RunTests.py script and all the more if you work in a testXXX
-file. "
-  (interactive)
-  (python-runtests)
-  )
-
-(defun python-test-this ()
-  "Call RunTests.py for this file only, usefull only when working
-in a 'testXXX' file"
-  (interactive)
-  (let (filenametrunk)
-    (setq filenametrunk
-	  (file-name-nondirectory
-	   (file-name-sans-extension buffer-file-name)
-	   )
-	  )
-    (python-runtests (concat "--run_test=" filenametrunk))
-    )
-  )
-
-(defun python-test-select (test-name)
-  "Call RunTests.py for a given test only. Usefull when you are
-inside a directory hierachy on top of which there is a
-RunTests.py script and all the more if you work in a testXXX
-file. "
-  (interactive)
-  (python-runtests (concat "--run_test=" test-name))
-  )
 
 
 
