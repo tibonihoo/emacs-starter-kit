@@ -76,8 +76,6 @@
      
      (add-to-list 'flymake-allowed-file-name-masks 
                   '("\\.py\\'" flymake-pyflakes-init))
-     ;; navigate errors returned by flymake
-     (define-key python-mode-map "\C-c\C-v" 'flymake-goto-next-error)
      ))
 (add-hook 'python-mode-hook 'flymake-mode)
 
