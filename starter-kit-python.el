@@ -37,6 +37,21 @@
      ))
 
 
+;; Ropemacs (http://rope.sourceforge.net/ropemacs.html)
+;; To get some live (intelligent) completion, documentation and
+;; refactoring function.
+(eval-after-load 'python
+  '(progn
+     ;; Setup auto-complete to use Rope
+     (ac-ropemacs-enable) 
+     (setq ropemacs-enable-autoimport t)
+     (setq ropemacs-enable-shortcuts nil)
+     (setq ropemacs-guess-project t)
+     (add-hook 'python-mode-hook 'ropemacs-mode)
+     (define-key python-mode-map "\C-cds" 'rope-show-doc)
+     ))
+
+
 ;;; Flymake
 ;; ~Static code checking
 (eval-after-load 'python
