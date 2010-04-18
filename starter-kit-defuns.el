@@ -219,13 +219,21 @@ Symbols matching the text at point are put first in the completion list."
 
 
 ;; -----------------------------------------------------------------------------
-;; Size manipulation
+;; Frame size manipulation
 ;; -----------------------------------------------------------------------------
-;; see http://www.emacsblog.org/2007/02/22/maximize-on-startup-part-2/ for better stuff
 
 (defun frame-set-fullscreen (&optional f)
-  "Makes the frame as big as possible"
+  "This function is called by toggle-fullscreen if the frame was previously in a 'custom' size.
+
+You can also make it so that this function is called directly when emacs starts by adding the following command to your initialisation file:
+
+ ;; Set initialise frame size
+ (add-hook 'window-setup-hook 'frame-set-fullscreen t)
+"
   (interactive)
+  (if (not f)
+      (setq f (selected-frame))
+      )
   ;; under Windows
   (if (eq system-type 'windows-nt)
       (progn
@@ -245,39 +253,25 @@ Symbols matching the text at point are put first in the completion list."
 	)
       )
     )
-  (setq frame-is-set-to-custom-size nil)
   )
 
 
 (defun frame-set-custom-size (&optional f)
-  "Make the frame as wide as possible (useful for dual displays, site to be adapted)"
+  "This function is called by toggle-fullscreen if the frame was previously in fullscreen mode.
+
+Feel free to reimplement a function with the same name to get your prefered 'custom' size.
+
+You can also make it so that this function is called directly when emacs starts by adding the following command to your initialisation file:
+
+ ;; Set initialise frame size
+ (add-hook 'window-setup-hook 'frame-set-custom-size t)
+"
   (interactive)
   (if (not f)
       (setq f (selected-frame))
       )
-  (if (eq system-type 'windows-nt)
-      (progn
-	(w32-send-sys-command #xf120) ;; from Windows WM_SYSCOMMAND : SC_RESTORE
-	(set-frame-height f 57)
-	(set-frame-position f 0 -1)
-	(set-frame-width f 317)
-	)
-    (progn 
-      (set-frame-width f 82)
-      ;; default to internal method with default size
-      (set-frame-height f 60)
-      ;; try something I prefer, but which might not be doable on all
-      ;; systems (at least no in this precise way)
-      (condition-case err
-	  ;; talk to X directly to try to get the fullavailable screen height 
-	  (x-send-client-message f 0 nil "_NET_WM_STATE" 32
-				 '(2 "_NET_WM_STATE_MAXIMIZED_VERT" 0))
-	;; default to internal method
-	(set-frame-parameter f 'fullscreen 'fullheight)
- 	)
-      )
-    )
-  (setq frame-is-set-to-custom-size t)
+  (set-frame-width f 80)
+  (set-frame-height f 42)
   )
 
 ;; Init the flag to whatever, it will be changed as soon as one of the
@@ -288,8 +282,14 @@ Symbols matching the text at point are put first in the completion list."
   "Switch between the fullscreen and custom sized frames"
   (interactive)
   (if frame-is-set-to-custom-size
-      (frame-set-fullscreen)
-    (frame-set-custom-size)
+      (progn
+        (frame-set-fullscreen)
+        (setq frame-is-set-to-custom-size nil)
+        )
+    (progn
+      (frame-set-custom-size)
+      (setq frame-is-set-to-custom-size t)
+      )
     )
   )
 
