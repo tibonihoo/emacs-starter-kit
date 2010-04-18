@@ -217,14 +217,98 @@ Symbols matching the text at point are put first in the completion list."
   (interactive)
   (message "%s" (point)))
 
-(defun toggle-fullscreen ()
-  (interactive)
-  ;; TODO: this only works for X. patches welcome for other OSes.
-  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                         '(2 "_NET_WM_STATE_MAXIMIZED_VERT" 0))
-  (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                         '(2 "_NET_WM_STATE_MAXIMIZED_HORZ" 0)))
 
+;; -----------------------------------------------------------------------------
+;; Frame size manipulation
+;; -----------------------------------------------------------------------------
+
+(defun frame-set-fullscreen (&optional f)
+  "This function is called by toggle-fullscreen if the frame was previously in a 'custom' size.
+
+You can also make it so that this function is called directly when emacs starts by adding the following command to your initialisation file:
+
+ ;; Set initialise frame size
+ (add-hook 'window-setup-hook 'frame-set-fullscreen t)
+"
+  (interactive)
+  (if (not f)
+      (setq f (selected-frame))
+      )
+  ;; store the current width and height into the frame's variables
+  (set-frame-parameter f 'previous-width (frame-width f))
+  (set-frame-parameter f 'previous-height (frame-height f))
+  (cond
+   ( (eq system-type 'windows-nt)
+     ;; under Windows
+     (w32-send-sys-command #xf030) ;; from Windows WM_SYSCOMMAND : SC_MAXIMIZE
+     )
+   ( t
+     ;; default to internal method
+     (set-frame-parameter f 'fullscreen 'fullboth)
+     )
+   )
+  ;; This is a hack to get a flag that will also work on windows,
+  ;; hopefully it won't be needed for long.
+  (set-frame-parameter f 'is-fullscreen t)
+  )
+
+(defun frame-set-fullscreen-off (&optional f)
+  "This function is called by toggle-fullscreen if the frame was previously in a 'fullscreen' size.
+
+This should restore your frame to its previous size.
+
+Known bug: sometimes only one of the two dimensions gets restored.
+"
+  (interactive)
+  (if (not f)
+      (setq f (selected-frame))
+    )
+  ;; First make sure to be out of the fullscren mode
+  (cond
+   ( (eq system-type 'windows-nt)
+     ;; under Windows
+     (w32-send-sys-command #xf120) ;; from Windows WM_SYSCOMMAND: SC_RESTORE
+     )
+   ( t
+     ;; default to internal method
+     (set-frame-parameter f 'fullscreen 'nil)
+     )
+   )
+  ;; see if some info is stored about previous sizes and restore them.
+  ;; NOTE: this seem to be a little buggy: maybe a synchronisation
+  ;; problem between the wm command to take effect and the execution
+  ;; of the following instruction ???
+  (when (assq 'previous-width (frame-parameters f))
+    (set-frame-width f (frame-parameter f 'previous-width)))
+  (when (assq 'previous-height (frame-parameters f))
+    (set-frame-height f (frame-parameter f 'previous-height)))
+  (when (assq 'is-fullscreen (frame-parameters f))
+    (set-frame-parameter f 'is-fullscreen nil)
+    )
+  )
+
+(defun frame-is-set-to-fullscreen (&optional f)
+  "Check wether the frame is fullscreen.
+This function is here to take into account the hacks from frame-set-fullscreen"
+  (if (not f)
+      (setq f (selected-frame))
+    )
+  (or (frame-parameter f 'is-fullscreen) 
+      (frame-parameter f 'fullscreen))
+  )
+
+
+(defun toggle-fullscreen (&optional f)
+  "Switch between the fullscreen and custom sized frames"
+  (interactive)
+  (if (not f)
+      (setq f (selected-frame))
+    )
+  (if (frame-is-set-to-fullscreen f) 
+      (frame-set-fullscreen-off f)
+    (frame-set-fullscreen f)
+    )
+  )
 
 ;; A monkeypatch to cause annotate to ignore whitespace
 (defun vc-git-annotate-command (file buf &optional rev)
