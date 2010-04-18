@@ -10,7 +10,8 @@
 ;; Work context
 (defvar my-work-context "home")
 ;; Set initialise frame size
-(add-hook 'window-setup-hook 'custom-sized-frame t)
+(add-to-list 'default-frame-alist '(height . 42))
+(add-to-list 'default-frame-alist '(width . 81))
 
 
 ;; -----------------------------------------------------------------------------
@@ -180,7 +181,7 @@
 
 
 ;; -----------------------------------------------------------------------------
-;; Navigation between buffers
+;; Window size control
 ;; -----------------------------------------------------------------------------
 
 (defun window-height-increase ()

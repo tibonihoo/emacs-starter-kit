@@ -9,7 +9,12 @@
 (set 'user-mail-address "tn@a2ia.com")
 ;; Work context
 (defvar my-work-context "DR")
-;; Set initialise frame size
+;; Set prefered frame size
+(add-to-list 'default-frame-alist '(height . 57))
+(add-to-list 'default-frame-alist '(width . 317))
+(add-to-list 'default-frame-alist '(top . -1))
+(add-to-list 'default-frame-alist '(left . -0))
+;; Make sure the frame is fullscreen on startup
 (add-hook 'window-setup-hook 'frame-set-fullscreen t)
 
 
@@ -122,8 +127,9 @@
 
 
 ;; -----------------------------------------------------------------------------
-;; Navigation between buffers
+;; Window size control
 ;; -----------------------------------------------------------------------------
+
 
 (defun window-height-increase ()
   "Increase the height of the window by 5%"
