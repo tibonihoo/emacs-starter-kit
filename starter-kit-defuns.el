@@ -234,61 +234,80 @@ You can also make it so that this function is called directly when emacs starts 
   (if (not f)
       (setq f (selected-frame))
       )
-  ;; under Windows
-  (if (eq system-type 'windows-nt)
-      (progn
-	(w32-send-sys-command #xf030) ;; from Windows WM_SYSCOMMAND : SC_MAXIMIZE
-	)
-    (progn 
-      ;; just resize and move the window
-      (set-frame-width f 317)
-      (set-frame-height f 57)
-      (set-frame-position f 0 0)
-      (condition-case err
-	  ;; talk to X directly (from http://www.emacswiki.org/emacs/FullScreen#toc2)
-	  (x-send-client-message f 0 nil "_NET_WM_STATE" 32
-				 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
-	;; default to internal method
-	(set-frame-parameter f 'fullscreen 'fullboth)
-	)
-      )
+  ;; store the current width and height into the frame's variables
+  (let* (
+         (previous-width-param (list (cons 'previous-width (frame-width f)))) 
+         (previous-height-param (list (cons 'previous-height (frame-height f)))) 
+         (newparms (frame-parameters f))
+         )
+    (setq newparms (append newparms previous-width-param))
+    (setq newparms (append newparms previous-height-param))
+    (modify-frame-parameters f newparms)
     )
+  (cond
+   ( (eq system-type 'windows-nt)
+     ;; under Windows
+     (w32-send-sys-command #xf030) ;; from Windows WM_SYSCOMMAND : SC_MAXIMIZE
+     )
+   ( t
+     ;; default to internal method
+     (set-frame-parameter f 'fullscreen 'fullboth)
+     )
+   )
   )
 
+(defun frame-set-fullscreen-off (&optional f)
+  "This function is called by toggle-fullscreen if the frame was previously in a 'fullscreen' size.
 
-(defun frame-set-custom-size (&optional f)
-  "This function is called by toggle-fullscreen if the frame was previously in fullscreen mode.
+This should restore your frame to its previous size or at least to the default size (depends on the window manager).
 
-Feel free to reimplement a function with the same name to get your prefered 'custom' size.
-
-You can also make it so that this function is called directly when emacs starts by adding the following command to your initialisation file:
-
- ;; Set initialise frame size
- (add-hook 'window-setup-hook 'frame-set-custom-size t)
+Remember that the default size can be customized with something like:
+    (add-to-list 'default-frame-alist '(height . 24))
+    (add-to-list 'default-frame-alist '(width . 80))
 "
   (interactive)
   (if (not f)
       (setq f (selected-frame))
-      )
-  (set-frame-width f 80)
-  (set-frame-height f 42)
+    )
+  ;; First make sure to be out of the fullscren mode
+  (cond
+   ( (eq system-type 'windows-nt)
+     ;; under Windows
+     (w32-send-sys-command #xf120) ;; from Windows WM_SYSCOMMAND: SC_RESTORE
+     )
+   ( t
+     ;; default to internal method
+     (set-frame-parameter f 'fullscreen 'nil)
+     )
+   )
+  ;; see if some info is stored about previous sizes and restore them.
+  ;; NOTE: this seem to be a little buggy: maybe a synchronisation
+  ;; problem between the wm command to take effect and the execution
+  ;; of the following instruction ???
+  (when (assq 'previous-width (frame-parameters f))
+    (set-frame-width f (cdr (assq 'previous-width (frame-parameters f))))
+    )
+  (when (assq 'previous-height (frame-parameters f))
+    (set-frame-height f (cdr (assq 'previous-height (frame-parameters f))))
+    )
   )
+
 
 ;; Init the flag to whatever, it will be changed as soon as one of the
 ;; two above function is called.
-(setq frame-is-set-to-custom-size nil)
+(setq frame-is-set-to-fullscreen-size nil)
 
 (defun toggle-fullscreen ()
   "Switch between the fullscreen and custom sized frames"
   (interactive)
-  (if frame-is-set-to-custom-size
-      (progn
-        (frame-set-fullscreen)
-        (setq frame-is-set-to-custom-size nil)
-        )
+  (if frame-is-set-to-fullscreen-size
     (progn
-      (frame-set-custom-size)
-      (setq frame-is-set-to-custom-size t)
+      (frame-set-fullscreen-off)
+      (setq frame-is-set-to-fullscreen-size nil)
+      )
+    (progn
+      (frame-set-fullscreen)
+      (setq frame-is-set-to-fullscreen-size t)
       )
     )
   )
