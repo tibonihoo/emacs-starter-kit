@@ -6,6 +6,7 @@
                                    'ruby-mode
                                    'inf-ruby
                                    'css-mode
+                                   'yasnippet-bundle
                                    'yaml-mode
                                    'magit
                                    'gist)
