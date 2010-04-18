@@ -235,15 +235,8 @@ You can also make it so that this function is called directly when emacs starts 
       (setq f (selected-frame))
       )
   ;; store the current width and height into the frame's variables
-  (let* (
-         (previous-width-param (list (cons 'previous-width (frame-width f)))) 
-         (previous-height-param (list (cons 'previous-height (frame-height f)))) 
-         (newparms (frame-parameters f))
-         )
-    (setq newparms (append newparms previous-width-param))
-    (setq newparms (append newparms previous-height-param))
-    (modify-frame-parameters f newparms)
-    )
+  (set-frame-parameter f 'previous-width (frame-width f))
+  (set-frame-parameter f 'previous-height (frame-height f))
   (cond
    ( (eq system-type 'windows-nt)
      ;; under Windows
@@ -254,16 +247,17 @@ You can also make it so that this function is called directly when emacs starts 
      (set-frame-parameter f 'fullscreen 'fullboth)
      )
    )
+  ;; This is a hack to get a flag that will also work on windows,
+  ;; hopefully it won't be needed for long.
+  (set-frame-parameter f 'is-fullscreen t)
   )
 
 (defun frame-set-fullscreen-off (&optional f)
   "This function is called by toggle-fullscreen if the frame was previously in a 'fullscreen' size.
 
-This should restore your frame to its previous size or at least to the default size (depends on the window manager).
+This should restore your frame to its previous size.
 
-Remember that the default size can be customized with something like:
-    (add-to-list 'default-frame-alist '(height . 24))
-    (add-to-list 'default-frame-alist '(width . 80))
+Known bug: sometimes only one of the two dimensions gets restored.
 "
   (interactive)
   (if (not f)
@@ -285,30 +279,34 @@ Remember that the default size can be customized with something like:
   ;; problem between the wm command to take effect and the execution
   ;; of the following instruction ???
   (when (assq 'previous-width (frame-parameters f))
-    (set-frame-width f (cdr (assq 'previous-width (frame-parameters f))))
-    )
+    (set-frame-width f (frame-parameter f 'previous-width)))
   (when (assq 'previous-height (frame-parameters f))
-    (set-frame-height f (cdr (assq 'previous-height (frame-parameters f))))
+    (set-frame-height f (frame-parameter f 'previous-height)))
+  (when (assq 'is-fullscreen (frame-parameters f))
+    (set-frame-parameter f 'is-fullscreen nil)
     )
   )
 
+(defun frame-is-set-to-fullscreen (&optional f)
+  "Check wether the frame is fullscreen.
+This function is here to take into account the hacks from frame-set-fullscreen"
+  (if (not f)
+      (setq f (selected-frame))
+    )
+  (or (frame-parameter f 'is-fullscreen) 
+      (frame-parameter f 'fullscreen))
+  )
 
-;; Init the flag to whatever, it will be changed as soon as one of the
-;; two above function is called.
-(setq frame-is-set-to-fullscreen-size nil)
 
-(defun toggle-fullscreen ()
+(defun toggle-fullscreen (&optional f)
   "Switch between the fullscreen and custom sized frames"
   (interactive)
-  (if frame-is-set-to-fullscreen-size
-    (progn
-      (frame-set-fullscreen-off)
-      (setq frame-is-set-to-fullscreen-size nil)
-      )
-    (progn
-      (frame-set-fullscreen)
-      (setq frame-is-set-to-fullscreen-size t)
-      )
+  (if (not f)
+      (setq f (selected-frame))
+    )
+  (if (frame-is-set-to-fullscreen f) 
+      (frame-set-fullscreen-off f)
+    (frame-set-fullscreen f)
     )
   )
 
