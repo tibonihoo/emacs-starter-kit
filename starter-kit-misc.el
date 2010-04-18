@@ -62,7 +62,20 @@
         ido-enable-flex-matching t
         ido-create-new-buffer 'always
         ido-use-filename-at-point 'guess
-        ido-max-prospects 10))
+        ido-max-prospects 10)
+  ;; Also use ido for bookmarks 
+  ;; ( taken from Qichen Huang's dot-emacs:
+  ;; http://code.google.com/p/my-emacs-jasonal/source/browse/emacs-init/trunk/dot-emacs.el?r=1 )
+  (defun ido-bookmark-jump (bookmark)
+    (interactive
+     (progn
+       (require 'bookmark)
+       (bookmark-maybe-load-default-file)
+       (list (ido-completing-read "Jump to bookmark: "
+                                  (mapcar 'car bookmark-alist)))))
+    (bookmark-jump bookmark))
+  (global-set-key (kbd "C-x r b") 'ido-bookmark-jump)
+  )
 
 (set-default 'indent-tabs-mode nil)
 (set-default 'indicate-empty-lines t)
