@@ -10,13 +10,10 @@
 ;; Work context
 (defvar my-work-context "DR")
 ;; Set prefered frame size
-(add-to-list 'default-frame-alist '(height . 57))
+(add-to-list 'default-frame-alist '(height . 59))
 (add-to-list 'default-frame-alist '(width . 317))
-(add-to-list 'default-frame-alist '(top . -1))
-(add-to-list 'default-frame-alist '(left . -0))
-;; Make sure the frame is fullscreen on startup
-(add-hook 'window-setup-hook 'frame-set-fullscreen t)
-
+(add-to-list 'default-frame-alist '(top + -3))
+(add-to-list 'default-frame-alist '(left + -1))
 
 
 (if (eq system-type 'windows-nt)
