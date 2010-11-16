@@ -508,7 +508,7 @@ currently selected region. (requires thingatpt.el)"
 ;; Display corrections
 ;; -----------------------------------------------------------------------------
 ;; Display 'Emacs' and then then current file's name in the window title
-(setq frame-title-format '("" "Emacs - %b"))
+;; (setq frame-title-format '("" "Emacs - %b"))
 
 
 ;; Key bindings corrections
@@ -533,6 +533,10 @@ currently selected region. (requires thingatpt.el)"
 ;; Show a dot to open a directory 
 ;; (keeps the usual emacs behaviour when opening a file)
 (setq ido-show-dot-for-dired t)
+;; I find this disturbing
+(setq ido-use-filename-at-point nil)
+;; but the feature is nice, so we might bind it to a diferent key:
+(global-set-key "\C-x\C-g" 'find-file-at-point)
 
 
 ;; *****************************************************************************
