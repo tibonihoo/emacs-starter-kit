@@ -71,6 +71,10 @@
 ;; For debugging Emacs modes
 (global-set-key (kbd "C-c p") 'message-point)
 
+;; To surround the word at point or current region with a XML tags
+(global-set-key "\C-xt" 'tag-word-or-region)
+
+
 ;; Applications
 
 (global-set-key (kbd "C-c j") (lambda () (interactive) (switch-or-start 'jabber-connect "*-jabber-*")))
