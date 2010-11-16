@@ -280,6 +280,8 @@ system as defined by AucTeX for multiple file documents."
   )
 
 (add-hook 'LaTeX-mode-hook 'starter-it-latex-hook)
+(add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
+(add-hook 'LaTeX-mode-hook 'turn-on-flyspell)
 
 
 (provide 'starter-kit-latex)
