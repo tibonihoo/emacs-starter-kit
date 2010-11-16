@@ -94,7 +94,7 @@ Symbols matching the text at point are put first in the completion list."
 
 (defun add-watchwords ()
   (font-lock-add-keywords
-   nil '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\):"
+   nil '(("\\<\\(FIXME\\|FIX\\|TODO\\|HACK\\|REFACTOR\\|BUG\\|NOCOMMIT\\|WARNING\\|ERROR\\|UGLY\\)[^[:word:]]*"
           1 font-lock-warning-face t))))
 
 (add-hook 'coding-hook 'local-column-number-mode)
@@ -138,6 +138,8 @@ Symbols matching the text at point are put first in the completion list."
           (0 (progn (compose-region (match-beginning 1) (match-end 1)
                                     ,(make-char 'greek-iso8859-7 107))
                     nil))))))
+
+
 
 ;; Other
 
