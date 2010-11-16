@@ -61,7 +61,7 @@
   (setq ido-enable-prefix nil
         ido-enable-flex-matching t
         ido-create-new-buffer 'always
-        ido-use-filename-at-point 'guess
+        ido-use-filename-at-point nil
         ido-max-prospects 10)
   ;; Also use ido for bookmarks 
   ;; ( taken from Qichen Huang's dot-emacs:
@@ -81,8 +81,8 @@
 (set-default 'indicate-empty-lines t)
 (set-default 'imenu-auto-rescan t)
 
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
-(add-hook 'text-mode-hook 'turn-on-flyspell)
+;; (add-hook 'text-mode-hook 'turn-on-auto-fill)
+;; (add-hook 'text-mode-hook 'turn-on-flyspell)
 
 (defvar coding-hook nil
   "Hook that gets run on activation of any programming mode.")
