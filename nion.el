@@ -49,27 +49,6 @@
 ;; -----------------------------------------------------------------------------
 ;; Custom color theme
 (color-theme-tango)
-;; Highlight Some keywords
-(require 'highlight-fixmes-mode)
-;; Customizing the font and keywords (@see
-;; http://members.iinet.net.au/~bethandmark/elisp/highlight-fixmes-mode.el)
-(setq fixme-words '("FIXME" "TODO" "NOCOMMIT" "THINKME" "BUG" "DEBUG" "NDEBUG"))
-(custom-set-faces
- '(fixme-face ((t (:background "orange" :foreground "black" :bold t))) t))
-;; create a global mode out of the minor mode (most stuff copied from font-core.el)
-(defun turn-on-highlight-fixmes-mode ()
-  "Turn on Highlight Fixmes mode."
-  (unless highlight-fixmes-mode
-    (highlight-fixmes-mode))
-  )
-(define-globalized-minor-mode global-highlight-fixmes-mode 
-  highlight-fixmes-mode 
-  turn-on-highlight-fixmes-mode
-  )
-;; activate the highlight for everyone
-(global-highlight-fixmes-mode t)
-
-
 
 ;;To avoid the compilation buffer to be displayed if there's no error
 (cons  
@@ -697,7 +676,7 @@ select the source buffer."
   "Show the sysparam page"
   (interactive)
   (let* (
-	 (weburl "file:///d:/HOME/Nion/Sources/Documentation/DevDoc/spb/SysParamRec.html")
+	 (weburl "file:///d:/HOME/Nion/Sources/Devel/parisrd/Documentation/DevDoc/spb/SysParamRec.html")
 	 (command (format "firefox %s"
 			  weburl))
 	 )
@@ -747,7 +726,8 @@ select the source buffer."
   (interactive)
   (let* (
 	 (pkviewCMD "D:/Home/nion/Bin/pkview ")
-	 (command (concat pkviewCMD buffer-file-name))
+	 (command (concat pkviewCMD
+                          "\"" buffer-file-name "\""))
 	 )
     (start-process-shell-command "PythonKob view" nil command)
     )
@@ -833,7 +813,7 @@ select the source buffer."
 ;; Display corrections
 ;; -----------------------------------------------------------------------------
 ;; Display 'Emacs' and then then current file's name in the window title
-(setq frame-title-format '("" "Emacs - %b"))
+;; (setq frame-title-format '("" "Emacs - %b"))
 
 ;; And I want the cursor to blink (helps in seeing when the program is
 ;; unstuck)
@@ -862,9 +842,9 @@ select the source buffer."
 ;; (keeps the usual emacs behaviour when opening a file)
 (setq ido-show-dot-for-dired t)
 ;; I find this disturbing
-(setq ido-use-filename-at-point 'disabled)
+(setq ido-use-filename-at-point nil)
 ;; but the feature is nice, so we might bind it to a diferent key:
-(global-set-key "\C-cf" 'find-file-at-point)
+(global-set-key "\C-x\C-g" 'find-file-at-point)
 
 
 ;; *****************************************************************************
@@ -880,5 +860,5 @@ select the source buffer."
 ;; Warning:
 ;; must always be called at last (registers all defined functions so far)
 (smex-initialize)
-;; auto-update after every 30-second-idle period
-(smex-auto-update 10)
+;; auto-update after every x-second-idle period
+(smex-auto-update 3)
