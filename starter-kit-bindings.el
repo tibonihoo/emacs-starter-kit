@@ -40,7 +40,11 @@
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 
 ;; Window switching. (C-x o goes to the next window)
-(windmove-default-keybindings) ;; Shift+direction
+(global-set-key (kbd "C-S-v") 'windmove-down)
+(global-set-key (kbd "C-S-c") 'windmove-left)
+(global-set-key (kbd "C-S-b") 'windmove-up)
+(global-set-key (kbd "C-S-n") 'windmove-right)
+
 (global-set-key (kbd "C-x O") (lambda () (interactive) (other-window -1))) ;; back one
 (global-set-key (kbd "C-x C-o") (lambda () (interactive) (other-window 2))) ;; forward two
 
