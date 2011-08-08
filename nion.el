@@ -804,6 +804,61 @@ select the source buffer."
     )
   )
 
+;; -----------------------------------------------------------------------------
+;; org-mode: TWiki export
+;; -----------------------------------------------------------------------------
+
+(require 'org-export-generic)
+(org-set-generic-type
+ "twiki" 
+ '(:file-suffix     ".twiki"
+   :key-binding     ?K
+   :header-prefix		    ""
+   :header-suffix		    "---\n\n"
+   :title-format		    "---+ %s\n"
+   
+   :date-export		    nil   
+   :toc-export		    nil
+
+   :timestamps-export           t
+   :priorities-export           t
+   :todo-keywords-export        t
+   :author-export             t
+   :tags-export               t
+   
+   :body-header-section-numbers   nil
+   :body-section-prefix	    "\n"
+
+   :body-section-header-prefix    ("---++ " "---+++ " "---++++ "
+				     "---+++++ " "---++++++ ")
+   :body-section-header-suffix    "\n\n"
+   
+   :body-line-export-preformated t
+   :body-line-fixed-prefix       "<VERBATIM>\n"
+   :body-line-fixed-suffix       "\n</VERBATIM>\n"
+   :body-line-fixed-format       "%s\n"
+   
+   ; other body lines
+   :body-line-format             "%s\n"
+   :body-line-wrap               80	
+   
+     
+   ;; TN: apparently hierarchies of lists are not taken into account (all items displayed on the same level) 
+   :body-list-format             "   * %s\n"
+   :body-number-list-format      "   1.%s\n"
+   :body-number-list-leave-number nil
+   
+   :body-bullet-list-prefix    ?\s
+   :body-bullet-list-format    "* %s\n"
+   
+   :body-list-checkbox-todo	"%P% "
+   :body-list-checkbox-todo-end	""
+   :body-list-checkbox-done	"%Y%"
+   :body-list-checkbox-done-end	""
+   :body-list-checkbox-half	":wip:"
+   :body-list-checkbox-half-end	""
+   )
+ )
 
 ;; *****************************************************************************
 ;; ********* WORKAROUNDS to starter kit ****************************************
@@ -817,16 +872,16 @@ select the source buffer."
 
 ;; And I want the cursor to blink (helps in seeing when the program is
 ;; unstuck)
-(blink-cursor-mode t)
+     (blink-cursor-mode t)
 
 ;; Key bindings corrections
-(add-hook 'paredit-mode-hook
-          (lambda ()
-            ;; paredit's bindings C-<right/left> are just
-            ;; killing me
-            (define-key paredit-mode-map (kbd "C-<right>") 'forward-word)
-            (define-key paredit-mode-map (kbd "C-<left>") 'backward-word)
-            ))
+     (add-hook 'paredit-mode-hook
+               (lambda ()
+                 ;; paredit's bindings C-<right/left> are just
+                 ;; killing me
+                 (define-key paredit-mode-map (kbd "C-<right>") 'forward-word)
+                 (define-key paredit-mode-map (kbd "C-<left>") 'backward-word)
+                 ))
 
 
 ;; -----------------------------------------------------------------------------
