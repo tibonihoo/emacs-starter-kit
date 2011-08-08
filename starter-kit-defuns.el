@@ -62,6 +62,80 @@ Symbols matching the text at point are put first in the completion list."
            (position (cdr (assoc selected-symbol name-and-pos))))
       (goto-char position))))
 
+
+
+;;; Dealing with encodings
+
+
+(defun encode-string-to-hexa-c-chars (str &optional keepASCII)
+  "Encode a string into another string where each byte is
+replaced by the exlicit notation of its hexadecimal code usable
+in C programming language for characters (the notation begining
+by '\\x').
+
+If keepASCII is non-nil then ASCII characters won't be converted,
+even when these ASCII characters are actually part of the
+decomposition of a single (multi-byte) character in the input string."
+  (mapconcat
+   (lambda (char) (if (and keepASCII (eq (char-charset char) 'ascii))
+                 (char-to-string char) (format "\\x%02X"  char)))
+   (string-to-list   (string-as-unibyte str))
+   ""))
+
+
+(defun insert-string-as-hexa-c-chars (str &optional keepASCII)
+  "Given a string, will convert its chars to their c hexadecimal
+representation and insert it in current buffer.
+
+If keepASCII is non-nil, ASCII characters will remain in the inserted string."
+  (interactive "sEncode and insert: ")
+  (insert (encode-string-to-hexa-c-chars str keepASCII))
+  )
+
+(defun insert-string-as-hexa-c-chars-keep-ascii (str)
+  "Just an alias to call insert-string-as-hexa-c-chars interactively
+and keep ASCII characters in the output."
+  (interactive "sEncode and insert: ")
+  (insert-string-as-hexa-c-chars str t)
+  )
+
+(defun encode-region-to-hexa-c-chars (start end &optional keepASCII)
+  "Given a region, replace its content byt the string obtained
+after convertion via encode-string-to-hexa-c-chars.
+
+If keepASCII is non-nil, ASCII characters will remain in the replacement string."
+  (interactive "*r")
+  (setq regionStr (buffer-substring start end))
+  (delete-region start end)
+  (goto-char start)
+  (insert-string-as-hexa-c-chars regionStr keepASCII)
+  )
+
+(defun encode-region-to-hexa-c-chars-keep-ascii (start end)
+  "Just an alias to call encode-region-to-hexa-c-chars interactively
+and keep ASCII characters in the output."
+  (interactive "*r")
+  (encode-region-to-hexa-c-chars start end t)
+  )
+
+(defun comment-copy-encode-region-to-hexa-c-chars-keep-ascii (start end &optional keepASCII)
+  "Same as encode-region-to-hexa-c-chars-keep-ascii but keep
+the original region in place and comment it out."
+  (interactive "*r")
+  (setq regionStr (buffer-substring start end))
+  (goto-char end)
+  (insert (encode-string-to-hexa-c-chars regionStr keepASCII))
+  (comment-region start end)
+  )
+
+(defun comment-copy-encode-region-to-hexa-c-chars-keep-ascii (start end)
+  "Just an alias to call comment-copy-encode-region-to-hexa-c-chars-keep-ascii interactively
+and keep ASCII characters in the output."
+  (interactive "*r")
+  (comment-copy-encode-region-to-hexa-c-chars-keep-ascii start end t)
+  )
+
+
 ;;; These belong in coding-hook:
 
 ;; We have a number of turn-on-* functions since it's advised that lambda
