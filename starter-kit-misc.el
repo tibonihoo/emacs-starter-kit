@@ -81,6 +81,9 @@
 (set-default 'indicate-empty-lines t)
 (set-default 'imenu-auto-rescan t)
 
+;; So that C-n adds a new line if already at the end of the buffer.
+(setq next-line-add-newlines t)
+
 ;; (add-hook 'text-mode-hook 'turn-on-auto-fill)
 ;; (add-hook 'text-mode-hook 'turn-on-flyspell)
 
