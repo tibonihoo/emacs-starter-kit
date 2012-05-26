@@ -39,6 +39,10 @@
 (require 'ansi-color)
 (require 'recentf)
 
+
+;; PROXY connection must be set asap in the loading process to help the elpa system
+;(setq url-proxy-services '(("http" . "myproxy:port")))
+
 ;; backport some functionality to Emacs 22 if needed
 (require 'dominating-file)
 
