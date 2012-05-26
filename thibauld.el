@@ -13,6 +13,11 @@
 (add-to-list 'default-frame-alist '(height . 42))
 (add-to-list 'default-frame-alist '(width . 81))
 
+(if (eq system-type 'windows-nt)
+    (set-face-attribute 'default nil :family "Consolas" :height 105)
+  ;; else use lucida
+  (set-face-attribute 'default nil :family "Monospace")
+  )
 
 ;; -----------------------------------------------------------------------------
 ;; Get a behaviour closer to all other apps
@@ -86,6 +91,11 @@
   "switch ispell language to british"
   (interactive)
   (ispell-change-dictionary "british"))
+
+(defun dico-en-us ()
+  "switch ispell language to us"
+  (interactive)
+  (ispell-change-dictionary "american"))
 ;; a handy shortcut for fly-spell This way you have: C-, goto next
 ;; mispelled word (default) M-o correct current word (instead of
 ;; M-TAB)
@@ -276,7 +286,16 @@
 ;; -----------------------------------------------------------------------------
 
 ;; Flymake additional functionalities
-(require 'flymake-add)
+(eval-after-load 'flymake
+  '(progn
+     (require 'flymake-add)
+     ))
+
+(add-hook 'flymake-mode-hook
+          '(lambda ()
+             (local-set-key (kbd "M-n") 'flymake-goto-next-error)
+             (local-set-key (kbd "M-p") 'flymake-goto-prev-error)
+             ))
 
 
 ;; -----------------------------------------------------------------------------
@@ -290,6 +309,8 @@
      (yas/define-snippets 'python-mode
                           '(
                             ("tnc" "# TN: NOCOMMIT" "Mark as uncommitable" nil)
+                            ("tntd" "# TN: TODO"
+                             "Insert a todo indicator "nil)
                             ("encoding" "# -*- coding: utf-8 -*-
 " "Set the file encoding" nil)
                             ("shebang" "#!/usr/bin/env python
@@ -298,8 +319,6 @@
                           )
      ;; imenu settings: also show function's args
      (setq py-imenu-show-method-args-p t)
-     ;; navigate errors returned by flymake
-     (define-key python-mode-map "\C-c\C-v" 'my-flymake-show-next-error)
      ;; A simple way to lookup a subject (so long as you're connected
      ;; to internet, else you can still use C-c C-f
      (defun python-search-www ()
@@ -322,6 +341,23 @@
 ;; -----------------------------------------------------------------------------
 ;; C/C++ personal config
 ;;-----------------------------------------------------------------------------
+
+;; .h are also C++
+(setq auto-mode-alist (cons '("\\.h\\'" . c++-mode) auto-mode-alist))
+
+(eval-after-load 'cc-mode
+  '(progn     
+     ;; Custom snippets (require 'yasnippet)
+     (yas/define-snippets 'c++-mode
+                          '(
+                            ("tnc" "// TN: NOCOMMIT" "no commit" nil)
+                            ))
+     (yas/define-snippets 'c-mode
+                          '(
+                            ("tnc" "/* TN: NOCOMMIT */" "no commit" nil)
+                            ))
+     ))
+
 (add-hook 'c-mode-common-hook
 	  '(lambda () 
 	     ;; Enable "hungry delete":
@@ -350,10 +386,11 @@
 	)
     (progn
       ;; on unix
-      (setq reftex-bibpath-environment-variables 
-	    '(".//:..:/home/thibauld/Documents/Scriptorium/LaTeXForge/Biblio//"))
-      )
-    ))
+      ;; (setq reftex-bibpath-environment-variables 
+	  ;;   ;; '(".//:..:/home/thibauld/Documents/Scriptorium/LaTeXForge/Biblio//"))
+      ;;       (quote (".//" "..//")))
+      ))
+  )
 
 
 
@@ -433,71 +470,203 @@ select the source buffer."
 	(move-end-of-line arg)
 	(uncomment-region beg (point)))
       )))
-(global-set-key "\C-c;" 'duplicate-comment-out)
+(global-set-key [(control ?\;)] 'duplicate-comment-out)
 
+
+;; the following is taken from http://stackoverflow.com/questions/88399/how-do-i-duplicate-a-whole-line-in-emacs/998472#998472
+;;;###autoload
+(defun duplicate-line (arg)
+  "Duplicate current line, leaving point in lower line."
+  (interactive "*p")
+
+  ;; save the point for undo
+  (setq buffer-undo-list (cons (point) buffer-undo-list))
+
+  ;; local variables for start and end of line
+  (let ((bol (save-excursion (beginning-of-line) (point)))
+        eol)
+    (save-excursion
+
+      ;; don't use forward-line for this, because you would have
+      ;; to check whether you are at the end of the buffer
+      (end-of-line)
+      (setq eol (point))
+
+      ;; store the line and disable the recording of undo information
+      (let ((line (buffer-substring bol eol))
+            (buffer-undo-list t)
+            (count arg))
+        ;; insert the line arg times
+        (while (> count 0)
+          (newline)         ;; because there is no newline in 'line'
+          (insert line)
+          (setq count (1- count)))
+        )
+
+      ;; create the undo information
+      (setq buffer-undo-list (cons (cons eol (point)) buffer-undo-list)))
+    ) ; end-of-let
+
+  ;; put the point in the lowest line and return
+  (next-line arg))
+(global-set-key [(control ?:)] 'duplicate-line)
+
+
+;; -----------------------------------------------------------------------------
+;; Buffer stats
+;; -----------------------------------------------------------------------------
 
 ;;;###autoload
-(defun duplicate-line-or-region (arg)
-  "Duplicate current line or region. If the region is active and
-  `transient-mark-mode' is on, the full region will be
-  duplicated.  Else the same happen but only on current line."
-  (interactive "*P")
-  (if (and mark-active transient-mark-mode)
-      (progn
-	(let (
-	      (original-region-begining (region-beginning))
-	      (original-region-end (region-end))
-	      )
-	  (kill-region original-region-begining original-region-end)
-	  (yank)
-	  (yank)
-	  )
-	)
-    (progn
-      (move-beginning-of-line arg)
-      (kill-whole-line)
-      (yank)
-      (yank)
-      )
-    ))
-(global-set-key "\C-c:" 'duplicate-line-or-region)
-
-
-
-;;;###autoload
-(defun count-word-occurences ()
-  "Print number of occurence of the symbol at point in the
-currently selected region. (requires thingatpt.el)"
+(defun count-symbol-at-point ()
+  "Count the number of occurences of the symbol at point, in the whole buffer"
   (interactive)
-  (let ((symbol (word-at-point)))
-    (unless symbol (error "No symbol at point"))
-    ;; 1. Set up appropriate conditions.
+  (let ((target-symbol (symbol-at-point)))
+    (unless target-symbol (error "No symbol at point"))
     (save-excursion
       (goto-char (point-min))
-      (let ((count 0))
-	
-	;; 2. Run the while loop.
-	(while (< (point) (point-max))
-	  (re-search-forward symbol (point-max) 0)
-	  (setq count (1+ count)))
-	;; we're automatically counting one more than necessary
-	(setq count (- count 1))
-	
-	;; 3. Send a message to the user.
-	(cond ((zerop count)
-	       (message
-		"The region does NOT have any words."))
-	      ((= 1 count)
-	       (message
-		(concat "Found 1 occurence of " symbol)))
-	      (t
-	       (message (concat "Found " (number-to-string count)
-                                " occurences of " symbol ))
-	       )
-	      )))))
+      (count-matches target-symbol))))
+
+(global-set-key [(meta m)] 'count-symbol-at-point)
+
+
+;; -----------------------------------------------------------------------------
+;; External OS/Desktop integration
+;; -----------------------------------------------------------------------------
+
+;;;###autoload
+(defun explore-current-directory ()
+  "Show current directory in OS's explorer."
+  (interactive)
+  (let* (
+	 (command   
+	  (if (eq system-type 'windows-nt)
+	      "explorer"
+	    "nautilus")
+	  )
+	 (arguments 
+	  (if (eq system-type 'windows-nt)
+	      ;; converting back and forth the '\\' and "/" in order
+	      ;; for expand-file-name to work and then for explorer to
+	      ;; understand the path.
+	      (replace-regexp-in-string "/" "\\\\" (expand-file-name (replace-regexp-in-string "\\\\" "/" default-directory )))
+	    (concat default-directory "/")
+	    )
+	  )
+	 )
+    (start-process-shell-command "Current directory exploration" nil 
+				 command arguments)
+    (message (concat "Directory exploration with: " command " " arguments))
+    )
+  )
+
+
+;;;###autoload
+(defun command-on-current-directory ()
+  "Show an external (native) command line with the working directory set to current one."
+  (interactive)
+  (if (eq system-type 'windows-nt)
+      ;; (let* ( 
+      ;; 	     ( 
+      ;; 	      ;; converting back and forth the '\\' and "/" in order
+      ;; 	      ;; for expand-file-name to work and then for explorer to
+      ;; 	      ;; understand the path.
+      ;; 	      (replace-regexp-in-string "/" "\\\\" (expand-file-name (replace-regexp-in-string "\\\\" "/" default-directory )))
+      (progn
+	(w32-shell-execute "open" "cmd")
+	(message (concat "Command on directory with: " launcher))
+	)
+    (let* (
+	   (command  "gnome-terminal")
+	   (change-directory-cmd
+	    (concat
+	     "cd "
+	     (concat default-directory "/")
+	     )
+	    )
+	   (launcher (concat
+		      change-directory-cmd
+		      " && "
+		      command
+		      )
+		     )
+	   )
+      (start-process-shell-command "Current directory for command" nil launcher nil)
+      (message (concat "Command on directory with: " launcher))
+      )
+    )
+  )
 
 
 
+(defun directory-parent-directory (directory-name)
+  "Return the parent directory of a given directory"
+  (file-name-directory 
+   (directory-file-name 
+    (expand-file-name directory-name)
+    )
+   )
+  )
+
+(defun directory-is-root (directory-name)
+  "Return t if the directory name is a root of the filesystem (that is '/' or 'c:/', 'd:/' (...) on Windows."
+  (string= 
+   (directory-parent-directory directory-name)
+   directory-name
+   )
+  )
+
+
+
+
+(defun generate-doc-doxygen ()
+  "Generate Doxygen documentation related to current file or folder"
+  (interactive)
+  (let  ( 
+	 ;; the directory where the doxygen.cfg file should be located (if any)
+	 doxygen-config-parent-directory 
+	 ;; the full path to the doxygen.cfg file (if it exists)
+	 doxygen-config-file
+	 ;; "expected" full path to the index of the generated doc
+	 doxygen-html-index-file
+	 ;; remember in which directory the function is run
+	 (saved-default-directory default-directory)
+	 )
+    ;; lookup for the directory containing the closest doxygen.conf
+    ;; the file hierarchy).
+    (setq doxygen-config-parent-directory
+	  (locate-dominating-file 
+	   (directory-file-name (expand-file-name default-directory))
+	   "doxygen.cfg"
+	   )
+	  )
+    (if doxygen-config-parent-directory
+	  (progn
+	    (setq doxygen-config-parent-directory (expand-file-name doxygen-config-parent-directory))
+	    (setq doxygen-config-file (concat doxygen-config-parent-directory "/doxygen.cfg"))
+	    (setq doxygen-html-index-file (concat doxygen-config-parent-directory "/build_doc/html/index.html"))
+	    ;; bullet proofize against windows "\" vs "/" plague
+	    (if (eq system-type 'windows-nt)
+		(progn
+		  (setq doxygen-config-file
+			(replace-regexp-in-string "/" "\\\\" doxygen-config-file ))
+		  )
+	      )
+	    ;; jump to doxygen.cfg's directory to launch it properly
+	    (cd doxygen-config-parent-directory)
+	    (compile (concat "doxygen " doxygen-config-file
+			     " && firefox " "file://" doxygen-html-index-file))
+	    ;; restore the initial directory
+	    (cd saved-default-directory)
+	    ;; ;; also automatically launch a view on the generated documentation
+	    ;; (start-process-shell-command "Browse Doxygen" nil 
+	    ;; 				 (concat "firefox " 
+	    ;; 					 "file://" doxygen-html-index-file))
+	    )
+	  ;; a message in case of error
+	  (message "doxygen.conf not found, no documentation generated !")
+	  )
+    )
+  )
 
 
 ;; *****************************************************************************
@@ -510,6 +679,9 @@ currently selected region. (requires thingatpt.el)"
 ;; Display 'Emacs' and then then current file's name in the window title
 ;; (setq frame-title-format '("" "Emacs - %b"))
 
+;; And I want the cursor to blink (helps in seeing when the program is
+;; unstuck)
+(blink-cursor-mode t)
 
 ;; Key bindings corrections
 (add-hook 'paredit-mode-hook
