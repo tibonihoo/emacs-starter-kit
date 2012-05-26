@@ -46,7 +46,7 @@
    " * " (doxymacs-doxygen-command-char) "brief  " (p "Brief description of this file: ") > n
    " * " > n
    " * " p > n
-   "*/" > n)
+   "*/" > n))
 
 (defconst doxymacs-morphee-function-comment-template
  '((let ((next-func (doxymacs-find-next-func)))
