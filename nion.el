@@ -9,12 +9,21 @@
 (set 'user-mail-address "tn@a2ia.com")
 ;; Work context
 (defvar my-work-context "DR")
-;; Set prefered frame size
-(add-to-list 'default-frame-alist '(height . 59))
-(add-to-list 'default-frame-alist '(width . 317))
-(add-to-list 'default-frame-alist '(top + -3))
-(add-to-list 'default-frame-alist '(left + -1))
 
+(if (eq system-type 'windows-nt)
+    (progn
+      ;; Set prefered frame size
+      (add-to-list 'default-frame-alist '(height . 59))
+      (add-to-list 'default-frame-alist '(width . 317))
+      (add-to-list 'default-frame-alist '(top + -3))
+      (add-to-list 'default-frame-alist '(left + -1))
+      )
+  (progn
+    ;; for my linux workstation
+    (frame-set-fullscreen-off)
+    (add-to-list 'default-frame-alist '(height . 66))
+    (add-to-list 'default-frame-alist '(width . 281))
+    ))
 
 (if (eq system-type 'windows-nt)
     (set-face-attribute 'default nil :family "Consolas" :height 105)
