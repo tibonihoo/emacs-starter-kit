@@ -340,6 +340,12 @@ You can also make it so that this function is called directly when emacs starts 
      ;; under Windows
      (w32-send-sys-command #xf030) ;; from Windows WM_SYSCOMMAND : SC_MAXIMIZE
      )
+   ( (memq window-system '(mac ns))
+     (progn ;; specific for a macbookpro of 2012
+       (set-frame-width f 202)
+       (set-frame-height f 53)
+       )
+     )
    ( t
      ;; default to internal method
      (set-frame-parameter f 'fullscreen 'fullboth)

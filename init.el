@@ -52,6 +52,9 @@
 
 ;; Load up ELPA, the package manager
 (require 'package)
+(add-to-list 'package-archives 
+             '("marmalade" .
+               "http://marmalade-repo.org/packages/"))
 (package-initialize)
 (require 'starter-kit-elpa)
 
