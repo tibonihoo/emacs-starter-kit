@@ -13,10 +13,21 @@
 (add-to-list 'default-frame-alist '(height . 42))
 (add-to-list 'default-frame-alist '(width . 81))
 
-(if (eq system-type 'windows-nt)
-    (set-face-attribute 'default nil :family "Consolas" :height 105)
-  ;; else use lucida
-  (set-face-attribute 'default nil :family "Monospace")
+(cond 
+ ( (eq system-type 'windows-nt)
+   (set-face-attribute 'default nil :family "Consolas" :height 105)
+   )
+ ( (memq window-system '(mac ns))
+   (set-face-attribute 'default nil :family "Menlo")
+   )
+ ( t
+   ;; else use lucida
+   (set-face-attribute 'default nil :family "Monospace")
+  )
+)
+
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize)
   )
 
 ;; -----------------------------------------------------------------------------
