@@ -23,6 +23,15 @@
 ;;
 ;;
 
+;; (setq c-paragraph-start "\\("
+;;       c-paragraph-start
+;;       "\\|"
+;;       "//! "
+;;       "\\)"))
+
+(setq c-paragraph-start 
+      "\\(//!\\|/*\\|^ * \\)"
+      )
 
 (eval-after-load 'cc-mode
   '(progn
@@ -31,8 +40,8 @@
      ;; navigation between corresponding header and source files
      (require 'sourcepair)
      (setq sourcepair-recurse-ignore  (append sourcepair-recurse-ignore '(".svn" ".hg" ".git" )))
-     (setq sourcepair-source-path  (append sourcepair-source-path '("../src" "../source" "./src" "./source" "../*")))
-     (setq sourcepair-header-path  (append sourcepair-header-path '("../include" "../inc" "../*")))
+     (setq sourcepair-source-path  (append sourcepair-source-path '("../src" "../source" "./src" "./source" "../*" "../../src/*")))
+     (setq sourcepair-header-path  (append sourcepair-header-path '("../include" "../inc" "../*" "../../include/*")))
      (define-key c-mode-base-map (kbd "C-c o") 'sourcepair-load)
      ;; Doxygen help (but don't fail if doxymacs cannot be found)
      (condition-case err
@@ -45,10 +54,16 @@
           )
         )
        )
-     (add-hook 'c-mode-hook 'doxymacs-mode)
-     (add-hook 'c++-mode-hook 'doxymacs-mode)
-     ))
+     )
+  )
 
+(defun hideshow-setup
+  "Launch hide-show minor mode and setup custom bindings"
+  (hs-minor-mode t)
+  (define-key c-mode-base-map (kbd "C-c s") 'hs-show-block)
+  (define-key c-mode-base-map (kbd "C-c h") 'hs-hide-block)
+  (define-key c-mode-base-map (kbd "C-c H") 'hs-hide-all)
+  )
 
 (add-hook 'c-mode-common-hook 'run-coding-hook)
 (add-hook 'c-mode-common-hook 'idle-highlight)
@@ -62,14 +77,12 @@
 	     ;;    *automatic indentation and 'end of line' 
 	     ;;    after some specific caracters (#,{,...).
 	     (c-toggle-auto-newline 1)
-	     ;;
-	     ;; Launch Hideshow minor mode:
-	     ;; use:
-	     ;;    *S-Mouse-2 hide/show a block
-	     (hs-minor-mode t)
-	     ;;
+	     ;; Launch Hideshow minor mode
+	     (hideshow-setup)
 	     ;; Display in which function you are
 	     (which-function-mode)
+             ;; Use doxymacs
+             (doxymacs-mode)
              );; end of c-mode-common-hook
           )
 

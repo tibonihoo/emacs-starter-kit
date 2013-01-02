@@ -11,7 +11,10 @@
                                    'yaml-mode
                                    'magit
                                    'gist
+				   'wgrep
                                    'exec-path-from-shell
+				   'cmake-mode
+				   'gtags
                                    )
   "Libraries that should be installed by default.")
 
