@@ -168,8 +168,12 @@ and keep ASCII characters in the output."
 
 (defun add-watchwords ()
   (font-lock-add-keywords
-   nil '(("\\<\\(FIXME\\|FIX\\|TODO\\|HACK\\|REFACTOR\\|BUG\\|NOCOMMIT\\|WARNING\\|ERROR\\|UGLY\\)[^[:word:]]*"
-          1 font-lock-warning-face t))))
+   nil '(
+         ("\\<\\(FIXME\\|FIX\\|TODO\\|HACK\\|REFACTOR\\|BUG\\|NOCOMMIT\\|WARNING\\|ERROR\\|UGLY\\|Failed\\)[^[:word:]]*"
+          1 font-lock-warning-face t)
+         ("\\<\\(Passed\\)[^[:word:]]*"
+          1 font-lock-type-face t)
+         )))
 
 (add-hook 'coding-hook 'local-column-number-mode)
 (add-hook 'coding-hook 'local-comment-auto-fill)
@@ -177,7 +181,9 @@ and keep ASCII characters in the output."
 (add-hook 'coding-hook 'turn-on-save-place-mode)
 (add-hook 'coding-hook 'pretty-lambdas)
 (add-hook 'coding-hook 'add-watchwords)
-  
+
+(add-hook 'compilation-mode-hook 'add-watchwords)
+
 (defun run-coding-hook ()
   "Enable things that are convenient across all coding buffers."
   (run-hooks 'coding-hook))
@@ -315,6 +321,18 @@ and keep ASCII characters in the output."
   (interactive)
   (message "%s" (point)))
 
+(defun uniquify-region-lines (beg end)
+    "Remove duplicate adjacent lines in region."
+    (interactive "*r")
+    (save-excursion
+      (goto-char beg)
+      (while (re-search-forward "^\\(.*\n\\)\\1+" end t)
+        (replace-match "\\1"))))
+  
+(defun uniquify-buffer-lines ()
+  "Remove duplicate adjacent lines in the current buffer."
+  (interactive)
+  (uniquify-region-lines (point-min) (point-max)))
 
 ;; -----------------------------------------------------------------------------
 ;; Frame size manipulation
