@@ -437,5 +437,81 @@ This function is here to take into account the hacks from frame-set-fullscreen"
   (let ((name (file-relative-name file)))
     (vc-git-command buf 0 name "blame" "-w" rev)))
 
+
+;; Set-up helpers for specific modes
+
+(defun setup-cmake-mode ()
+  "Set up cmake mode and associate it with the proper file extensions"
+  (require 'cmake-mode)
+  (setq auto-mode-alist
+        (append '(("CMakeLists\\.txt\\'" . cmake-mode)
+                  ("\\.cmake\\'" . cmake-mode))
+                auto-mode-alist))
+  )
+
+;; warning requires the erin mode !
+(defun setup-twiki-mode ()
+  "Set up erin, the twiki mode and associate it with the proper file extensions"
+  (autoload 'erin-mode "erin" nil t)
+  (add-to-list 'auto-mode-alist (cons "\\.twiki\\'" 'erin-mode))
+  )
+
+
+;; -----------------------------------------------------------------------------
+;; Window size control
+;; -----------------------------------------------------------------------------
+
+
+(defun window-height-increase ()
+  "Increase the height of the window by 5%"
+  (interactive)
+  (enlarge-window (max 1 (round (* .05 (window-height)))))
+  )
+
+(defun window-height-decrease ()
+  "Decrease the height of the window by 5%"
+  (interactive)
+  (enlarge-window (min -1 (round (* -.05 (window-width)))))
+  )
+
+(defun window-width-increase ()
+  "Increase the width of the window by 5%"
+  (interactive)
+  (enlarge-window-horizontally (max 1 (round (* .05 (window-width)))))
+  )
+
+(defun window-width-decrease ()
+  "Decrease the width of the window by 5%"
+  (interactive)
+  (enlarge-window-horizontally (min -1 (round (* -.05 (window-width)))))
+  )
+
+
+
+(defun window-height-small-increase ()
+  "Increase the height of the window by 1pix"
+  (interactive)
+  (enlarge-window 1)
+  )
+
+(defun window-height-small-decrease ()
+  "Decrease the height of the window by 1pix"
+  (interactive)
+  (enlarge-window -1)
+  )
+
+(defun window-width-small-increase ()
+  "Increase the width of the window by 1pix"
+  (interactive)
+  (enlarge-window-horizontally 1)
+  )
+
+(defun window-width-small-decrease ()
+  "Decrease the width of the window by 1pix"
+  (interactive)
+  (enlarge-window-horizontally -1)
+  )
+
+
 (provide 'starter-kit-defuns)
 ;;; starter-kit-defuns.el ends here

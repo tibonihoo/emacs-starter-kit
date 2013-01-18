@@ -33,15 +33,29 @@
       xterm-mouse-mode t
       save-place-file (concat dotfiles-dir "places"))
 
-;; Set this to whatever browser you use
-;; (setq browse-url-browser-function 'browse-url-firefox)
-;; (setq browse-url-browser-function 'browse-default-macosx-browser)
-;; (setq browse-url-browser-function 'browse-default-windows-browser)
-;; (setq browse-url-browser-function 'browse-default-kde)
-;; (setq browse-url-browser-function 'browse-default-epiphany)
-;; (setq browse-url-browser-function 'browse-default-w3m)
-;; (setq browse-url-browser-function 'browse-url-generic
-;;       browse-url-generic-program "~/src/conkeror/conkeror")
+;; Make sure the cursor blinks (helps in seeing when the program is stuck or not)
+(blink-cursor-mode t)
+
+;; No new line
+(setq next-line-add-newlines nil)
+
+;; Smooth scroll
+(setq scroll-step 1)
+
+;;To avoid the compilation buffer to be displayed if there's no error
+(cons  
+     (lambda (buf str)
+       (if (string-match "exited abnormally" str)
+           ;;there were errors
+           (message "compilation errors.")
+	  ;;no errors, make the compilation window go away in 0.5 seconds
+         (run-at-time 0.5 nil 'delete-windows-on buf)
+         (message "NO COMPILATION ERRORS!")
+	  )
+       )
+     compilation-finish-functions
+     )
+
 
 ;; Transparently open compressed files
 (auto-compression-mode t)
@@ -55,6 +69,9 @@
 ;; Highlight matching parentheses when the point is on them.
 (show-paren-mode 1)
 
+;; -----------------------------------------------------------------------------
+;; Basic setup for ido
+;; -----------------------------------------------------------------------------
 ;; ido-mode is like magic pixie dust!
 (when (> emacs-major-version 21)
   (ido-mode t)
@@ -76,13 +93,35 @@
     (bookmark-jump bookmark))
   (global-set-key (kbd "C-x r b") 'ido-bookmark-jump)
   )
+;; Let me hit enter before jumping to the (unique) matched item
+(setq ido-confirm-unique-completion t)
+;; Fuzzy matching 
+(setq ido-enable-flex-matching t)
+;; Disable matching on the merged list of directories (way too dangerous)
+(setq ido-auto-merge-work-directories-length nil)
+;; Tell dired to suggest the path to another open dired buffer (if
+;; any) as default path for stuff like copy (sweeeeeet)
+(setq dired-dwim-target 1)
+;; Show a dot to open a directory 
+;; (keeps the usual emacs behaviour when opening a file)
+(setq ido-show-dot-for-dired t)
+;; I find this disturbing
+(setq ido-use-filename-at-point nil)
+;; but the feature is nice, so we might bind it to a diferent key:
+(global-set-key "\C-x\C-g" 'find-file-at-point)
 
+
+;; Don't use tabs for indentation
 (set-default 'indent-tabs-mode nil)
+
+;; show on the left fringe if a line is empty
 (set-default 'indicate-empty-lines t)
+
+;; Force imenu to always rescan the buffers
 (set-default 'imenu-auto-rescan t)
 
 ;; So that C-n adds a new line if already at the end of the buffer.
-(setq next-line-add-newlines t)
+(setq next-line-add-newlines nil)
 
 ;; (add-hook 'text-mode-hook 'turn-on-auto-fill)
 ;; (add-hook 'text-mode-hook 'turn-on-flyspell)

@@ -112,5 +112,18 @@
 ;; Jump to a given line number
 (global-set-key "\M-g" 'goto-line)
 
+;; Window size changes (using functions from starter-kit-defun)
+;; height
+(global-set-key (kbd "C-S-j") 'window-height-increase)
+(global-set-key (kbd "C-S-k") 'window-height-decrease)
+(global-set-key (kbd "C-M-S-j") 'window-height-small-increase)
+(global-set-key (kbd "C-M-S-k") 'window-height-small-decrease)
+;; width
+(global-set-key (kbd "C-S-h") 'window-width-increase)
+(global-set-key (kbd "C-S-l") 'window-width-decrease)
+(global-set-key (kbd "C-M-S-h") 'window-width-small-increase)
+(global-set-key (kbd "C-M-S-l") 'window-width-small-decrease)
+
+
 (provide 'starter-kit-bindings)
 ;;; starter-kit-bindings.el ends here
