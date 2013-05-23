@@ -19,7 +19,7 @@
 (add-hook 'python-mode-hook 'run-coding-hook)
 (add-hook 'python-mode-hook 'idle-highlight)
 (add-hook 'python-mode-hook 'ac-python-mode-setup)
-
+(add-hook 'python-mode-hook 'jedi:setup)
 
 ;; Pymacs (http://pymacs.progiciels-bpi.ca/index.html)
 ;; Makes it possible to interface emacs lisp with some python code.
