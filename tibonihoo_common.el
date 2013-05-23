@@ -131,6 +131,7 @@
 ;; Colors ! colors everywhere...
 ;; -----------------------------------------------------------------------------
 ;; Custom color theme
+(require 'color-theme-tango)
 (color-theme-tango)
 (global-hl-line-mode)
 
@@ -211,7 +212,6 @@
      (setq python-indent 2)
      (setq indent-tabs-mode nil)
      (setq python-guess-indent nil)
-     (idle-highlight)
      ;; Define some handy snippets (requires yasnippet or yasnippet-bundle)
      (yas/define-snippets 'python-mode
                           '(
@@ -470,7 +470,6 @@ file. "
 
 (eval-after-load 'cc-mode
   '(progn
-     (idle-highlight)
      ;; Custom snippets (require 'yasnippet)
      (yas/define-snippets 'c++-mode
                           '(
@@ -514,12 +513,19 @@ file. "
          '(msbuildvclnk
            "^[ \t]*\\(?:[0-9]+>\\)?\\([^:\t\n]+\\)\s*: \\(?:fatal error\\|error\\) LNK[0-9]+"
            1 nil nil 2))
+        (err_gtest
+            ; Error sample:
+            ;D:\DATA\WORK\Framework-trunk\UnitTests\Core\UTImage\UTImagePatchGrid.cpp(59): error:
+         '(gtest_fail
+           "^[ \t]*\\(\\(?:[a-zA-Z0-9]:\\)?[^:(\t\n]+\\)(\\([0-9]+\\))\s*: \\(error:\\)"
+           1 2 nil 2))
         )
     (add-to-list 'compilation-error-regexp-alist-alist err_msbuild)
     (add-to-list 'compilation-error-regexp-alist-alist err_msbuild_lnk)
     (add-to-list 'compilation-error-regexp-alist-alist warn_msbuild)
     (add-to-list 'compilation-error-regexp-alist-alist info_msbuild)
-    (setq compilation-error-regexp-alist '(msbuildvc msbuildvc_warn msbuildvc_info msbuildvclnk msft))
+    (add-to-list 'compilation-error-regexp-alist-alist err_gtest)
+    (setq compilation-error-regexp-alist '(msbuildvc msbuildvc_warn msbuildvc_info msbuildvclnk gtest_fail))
     )
   )
   
