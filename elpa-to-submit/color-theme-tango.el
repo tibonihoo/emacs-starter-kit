@@ -34,7 +34,7 @@
      (border ((t (:background "#888a85"))))
      (fringe ((t (:background "grey10"))))
      (mode-line ((t (:foreground "#eeeeec" :background "#555753"))))
-     (region ((t (:background "#555753" :foreground "sandy brown")))) ;
+     (region ((t (:background "#555753")))) ;
      (font-lock-builtin-face ((t (:foreground "#729fcf"))))
      (font-lock-comment-face ((t (:foreground "#888a85"))))
      (font-lock-constant-face ((t (:foreground "#8ae234"))))
@@ -56,6 +56,8 @@
      (info-xref-visited ((t (:foreground "#ad7fa8"))))
      ;; adapt the hilighted line theme
      (hl-line ((t (:background "gray10"))))
+     (rst-level-1-face ((t (:background "grey85" :foreground "blue"))))
+     (error ((t (:foreground "red"))))
      )))
 
 (provide 'color-theme-tango)
