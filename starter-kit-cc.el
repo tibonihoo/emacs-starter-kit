@@ -57,7 +57,7 @@
      )
   )
 
-(defun hideshow-setup
+(defun hideshow-setup ()
   "Launch hide-show minor mode and setup custom bindings"
   (hs-minor-mode t)
   (define-key c-mode-base-map (kbd "C-c s") 'hs-show-block)
@@ -66,7 +66,6 @@
   )
 
 (add-hook 'c-mode-common-hook 'run-coding-hook)
-(add-hook 'c-mode-common-hook 'idle-highlight)
 
 
 (add-hook 'c-mode-common-hook
