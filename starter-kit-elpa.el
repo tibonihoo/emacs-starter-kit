@@ -10,11 +10,12 @@
                                    'yasnippet-bundle
                                    'yaml-mode
                                    'magit
-                                   'gist
 				   'wgrep
                                    'exec-path-from-shell
 				   'cmake-mode
 				   'gtags
+                                   'jedi
+                                   'log4j-mode
                                    )
   "Libraries that should be installed by default.")
 
