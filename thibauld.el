@@ -17,16 +17,16 @@
  ( (eq system-type 'windows-nt)
    (set-face-attribute 'default nil :family "Consolas" :height 105)
    )
- ( (memq window-system 'darwin)
+ ( (memq window-system '(mac ns))
    (set-face-attribute 'default nil :family "Menlo")
    )
  ( t
    ;; else use lucida
    (set-face-attribute 'default nil :family "Monospace")
   )
- )
+)
 
-(when (memq window-system 'darwin)
+(when (memq window-system '(mac ns))
   (exec-path-from-shell-initialize)
   )
 
@@ -720,14 +720,6 @@ select the source buffer."
 (setq ido-use-filename-at-point nil)
 ;; but the feature is nice, so we might bind it to a diferent key:
 (global-set-key "\C-x\C-g" 'find-file-at-point)
-
-
-;;
-;; Specific project configuration
-;;
-(add-to-list 'load-path "/home/thibauld/Development/wateronmars/wom-experiment")
-(require 'python-django)
-
 
 
 ;; *****************************************************************************

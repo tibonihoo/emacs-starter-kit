@@ -19,8 +19,6 @@
 (add-hook 'python-mode-hook 'run-coding-hook)
 (add-hook 'python-mode-hook 'idle-highlight)
 (add-hook 'python-mode-hook 'ac-python-mode-setup)
-(setq jedi:setup-keys t)
-(autoload 'jedi:setup "jedi" nil t)
 (add-hook 'python-mode-hook 'jedi:setup)
 
 ;; Pymacs (http://pymacs.progiciels-bpi.ca/index.html)
@@ -85,4 +83,3 @@
 
 (provide 'starter-kit-python)
 ;; starter-kit-python.el ends here
-
