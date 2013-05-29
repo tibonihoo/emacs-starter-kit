@@ -684,10 +684,12 @@ select the source buffer."
   (interactive)
   (let* (
 	 (command   
-	  (if (eq system-type 'windows-nt)
-	      "explorer"
-	    "nautilus")
-	  )
+	  (cond
+           ( (eq system-type 'windows-nt) "explorer")
+           ( (eq system-type 'darwin) "open" )
+           (t "nautilus")
+           )
+          )
 	 (arguments 
 	  (if (eq system-type 'windows-nt)
 	      ;; converting back and forth the '\\' and "/" in order
@@ -697,48 +699,45 @@ select the source buffer."
 	    (concat default-directory "/")
 	    )
 	  )
-	 )
+         )
     (start-process-shell-command "Current directory exploration" nil 
 				 command arguments)
     (message (concat "Directory exploration with: " command " " arguments))
-    )
-  )
-
+    ))
 
 ;;;###autoload
 (defun command-on-current-directory ()
   "Show an external (native) command line with the working directory set to current one."
   (interactive)
-  (if (eq system-type 'windows-nt)
-      ;; (let* ( 
-      ;; 	     ( 
-      ;; 	      ;; converting back and forth the '\\' and "/" in order
-      ;; 	      ;; for expand-file-name to work and then for explorer to
-      ;; 	      ;; understand the path.
-      ;; 	      (replace-regexp-in-string "/" "\\\\" (expand-file-name (replace-regexp-in-string "\\\\" "/" default-directory )))
-      (progn
-	(w32-shell-execute "open" "cmd")
-	(message (concat "Command on directory with: " launcher))
-	)
-    (let* (
-	   (command  "gnome-terminal")
-	   (change-directory-cmd
-	    (concat
-	     "cd "
-	     (concat default-directory "/")
-	     )
-	    )
-	   (launcher (concat
-		      change-directory-cmd
-		      " && "
-		      command
-		      )
-		     )
-	   )
-      (start-process-shell-command "Current directory for command" nil launcher nil)
-      (message (concat "Command on directory with: " launcher))
+  (cond
+   ( (eq system-type 'windows-nt)
+     (w32-shell-execute "cmd on current directory" "cmd")
+     (message "Command on current directory with: cmd" )
+     )
+   ( (eq system-type 'darwin)
+     (start-process-shell-command "Terminal.app on current directory" nil  (concat "open -a Terminal " default-directory))
+     (message "Command on current directory with: open -a Terminal")
+     )
+   (t (let* (
+             (command  "gnome-terminal")
+             (change-directory-cmd
+              (concat
+               "cd "
+               (concat default-directory "/")
+               )
+              )
+             (launcher (concat
+                        change-directory-cmd
+                        " && "
+                        command
+                        )
+                       )
+             )
+        (start-process-shell-command "Command on current directory" nil launcher nil)
+        (message (concat "Command on current directory with: " launcher))
+        )
       )
-    )
+   )
   )
 
 

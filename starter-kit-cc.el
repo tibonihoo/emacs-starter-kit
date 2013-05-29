@@ -40,8 +40,8 @@
      ;; navigation between corresponding header and source files
      (require 'sourcepair)
      (setq sourcepair-recurse-ignore  (append sourcepair-recurse-ignore '(".svn" ".hg" ".git" )))
-     (setq sourcepair-source-path  (append sourcepair-source-path '("../src" "../source" "./src" "./source" "../*" "../../src/*")))
-     (setq sourcepair-header-path  (append sourcepair-header-path '("../include" "../inc" "../*" "../../include/*")))
+     (setq sourcepair-source-path  (append sourcepair-source-path '("../../src/*" "../src" "../source" "./src" "./source" "../*")))
+     (setq sourcepair-header-path  (append sourcepair-header-path '("../../include/*" "../include" "../inc" "../*")))
      (define-key c-mode-base-map (kbd "C-c o") 'sourcepair-load)
      ;; Doxygen help (but don't fail if doxymacs cannot be found)
      (condition-case err
@@ -98,7 +98,54 @@
                )
              ))
 
+(defun add-clang-include-options-for-ede-project (option-list)
+  "Generate the string of -I's denoting all include dir, deduced from ede config for project if any. May return nil."
+  (let* (
+         (current-dir (file-name-directory
+                       (or (buffer-file-name (current-buffer)) default-directory)))
+         (prj (ede-current-project current-dir))
+         (current-include-dirs (oref prj include-path))
+         (current-project-root-dir (ede-project-root-directory prj))
+         (separator-with-root (concat "-I" current-project-root-dir))
+         )
+    (when current-include-dirs
+      (dolist (path current-include-dirs) (push (concat separator-with-root path) option-list))
+      (identity option-list) 
+      )
+    )
+  )
 
+
+(when (eq system-type 'darwin)
+  (require 'flymake)
+  ;; adapted from https://github.com/dmacvicar/duncan-emacs-setup
+  (defun flymake-clang-c++-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name)))
+           (option-list (add-clang-include-options-for-ede-project (list "-fsyntax-only" "-fno-color-diagnostics" "-x" "c++" local-file)))
+           )
+      ;;(message option-list)
+      (list "clang++" option-list)
+      )
+    )
+  (defun flymake-clang-c++-load ()
+    (interactive)
+    (unless (eq buffer-file-name nil)
+      (add-to-list 'flymake-allowed-file-name-masks
+                   '("\\.cpp\\'" flymake-clang-c++-init))
+      (add-to-list 'flymake-allowed-file-name-masks
+                   '("\\.cc\\'" flymake-clang-c++-init))
+      (add-to-list 'flymake-allowed-file-name-masks
+                   '("\\.h\\'" flymake-clang-c++-init))
+      (add-to-list 'flymake-allowed-file-name-masks
+                   '("\\.hpp\\'" flymake-clang-c++-init))
+      (flymake-mode t))
+    )
+  (add-hook 'c++-mode-hook 'flymake-clang-c++-load)
+  )
 
           
 ;; Cosmetic...
@@ -106,7 +153,7 @@
 	  '(lambda ()
 	     ;; change name 
 	     (setq mode-name "C++")
-	     )
+             )
 	  );; end of c++-mode-hook
 
 
