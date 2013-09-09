@@ -93,4 +93,7 @@
   (mapc #'load (directory-files user-specific-dir nil ".*el$")))
 
 ;;; init.el ends here
+<<<<<<< HEAD
 
+=======
+>>>>>>> re-add init.el
