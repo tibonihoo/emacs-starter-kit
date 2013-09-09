@@ -23,3 +23,5 @@ tramp
 ac-comphist.dat
 semanticdb/*
 ede-projects.el
+ede-projects-names.el
+
