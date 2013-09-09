@@ -135,7 +135,7 @@
 (color-theme-tango)
 (global-hl-line-mode)
 
-(add-hook 'coding-hook 'idle-highlight)
+;(add-hook 'coding-hook 'idle-highlight)
 
 
 ;; -----------------------------------------------------------------------------
