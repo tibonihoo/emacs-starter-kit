@@ -19,7 +19,10 @@
 (add-hook 'python-mode-hook 'run-coding-hook)
 (add-hook 'python-mode-hook 'idle-highlight)
 (add-hook 'python-mode-hook 'ac-python-mode-setup)
+(setq jedi:setup-keys t)
+(autoload 'jedi:setup "jedi" nil t)
 (add-hook 'python-mode-hook 'jedi:setup)
+
 
 ;; Pymacs (http://pymacs.progiciels-bpi.ca/index.html)
 ;; Makes it possible to interface emacs lisp with some python code.
@@ -35,21 +38,6 @@
      (add-to-list 'load-path
                   (concat dotfiles-dir "/elpa-to-submit/pymacs/lib"))
      ))
-
-
-;; ;; Ropemacs (http://rope.sourceforge.net/ropemacs.html)
-;; ;; To get some live (intelligent) completion, documentation and
-;; ;; refactoring function.
-;; (eval-after-load 'python
-;;   '(progn
-;;      ;; Setup auto-complete to use Rope
-;;      (ac-ropemacs-enable) 
-;;      (setq ropemacs-enable-autoimport t)
-;;      (setq ropemacs-enable-shortcuts nil)
-;;      (setq ropemacs-guess-project t)
-;;      (add-hook 'python-mode-hook 'ropemacs-mode)
-;;      (define-key python-mode-map "\C-cds" 'rope-show-doc)
-;;      ))
 
 
 ;;; Flymake
