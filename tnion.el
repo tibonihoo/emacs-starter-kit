@@ -154,7 +154,7 @@
 (cond
  ( (eq system-type 'windows-nt)
    (progn
-     (setq  compile-command "cmake -G \"Visual Studio 10 Win64\" -DUTTestImagesPathNetwork=D:/DATA/UTData ../.. && msbuild /p:configuration=release /m:8 Framework.sln && ctest -C release --output-on-failure")
+     (setq  compile-command "cmake -G \"Visual Studio 11 Win64\" -DUTTestImagesPathNetwork=D:/DATA/UTData ../.. && msbuild /p:configuration=release /m:8 Framework.sln && ctest -C release --output-on-failure")
      (setq local-projects-default-path "d:/DATA/WORK/")
      (setq local-projects-platform-define "WIN32")
      (defvar ede-project-build-current-build-platform "win64")
@@ -417,8 +417,3 @@ charge of poping the next item of gtags targets."
 
 ;; Always at the end !
 (require 'tibonihoo_common)
-
-
-
-
-

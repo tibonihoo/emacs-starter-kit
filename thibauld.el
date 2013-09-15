@@ -21,7 +21,7 @@
    (set-face-attribute 'default nil :family "Menlo")
    )
  ( t
-   (set-face-attribute 'default nil :family "Monospace")
+   (set-face-attribute 'default nil :family "Monospace" :height 105)
   )
  )
 
