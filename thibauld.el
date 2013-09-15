@@ -21,12 +21,11 @@
    (set-face-attribute 'default nil :family "Menlo")
    )
  ( t
-   ;; else use lucida
-   (set-face-attribute 'default nil :family "Monospace" :height 105)
+   (set-face-attribute 'default nil :family "Monospace")
   )
-)
+ )
 
-(when (memq window-system '(mac ns))
+(when (eq system-type 'darwin)
   (exec-path-from-shell-initialize)
   )
 
@@ -608,6 +607,22 @@ select the source buffer."
   )
 
 
+(defun directory-parent-directory (directory-name)
+  "Return the parent directory of a given directory"
+  (file-name-directory 
+   (directory-file-name 
+    (expand-file-name directory-name)
+    )
+   )
+  )
+
+(defun directory-is-root (directory-name)
+  "Return t if the directory name is a root of the filesystem (that is '/' or 'c:/', 'd:/' (...) on Windows."
+  (string= 
+   (directory-parent-directory directory-name)
+   directory-name
+   )
+  )
 
 (defun directory-parent-directory (directory-name)
   "Return the parent directory of a given directory"
@@ -626,6 +641,58 @@ select the source buffer."
    )
   )
 
+
+
+
+(defun generate-doc-doxygen ()
+  "Generate Doxygen documentation related to current file or folder"
+  (interactive)
+  (let  ( 
+	 ;; the directory where the doxygen.cfg file should be located (if any)
+	 doxygen-config-parent-directory 
+	 ;; the full path to the doxygen.cfg file (if it exists)
+	 doxygen-config-file
+	 ;; "expected" full path to the index of the generated doc
+	 doxygen-html-index-file
+	 ;; remember in which directory the function is run
+	 (saved-default-directory default-directory)
+	 )
+    ;; lookup for the directory containing the closest doxygen.conf
+    ;; the file hierarchy).
+    (setq doxygen-config-parent-directory
+	  (locate-dominating-file 
+	   (directory-file-name (expand-file-name default-directory))
+	   "doxygen.cfg"
+	   )
+	  )
+    (if doxygen-config-parent-directory
+	  (progn
+	    (setq doxygen-config-parent-directory (expand-file-name doxygen-config-parent-directory))
+	    (setq doxygen-config-file (concat doxygen-config-parent-directory "/doxygen.cfg"))
+	    (setq doxygen-html-index-file (concat doxygen-config-parent-directory "/build_doc/html/index.html"))
+	    ;; bullet proofize against windows "\" vs "/" plague
+	    (if (eq system-type 'windows-nt)
+		(progn
+		  (setq doxygen-config-file
+			(replace-regexp-in-string "/" "\\\\" doxygen-config-file ))
+		  )
+	      )
+	    ;; jump to doxygen.cfg's directory to launch it properly
+	    (cd doxygen-config-parent-directory)
+	    (compile (concat "doxygen " doxygen-config-file
+			     " && firefox " "file://" doxygen-html-index-file))
+	    ;; restore the initial directory
+	    (cd saved-default-directory)
+	    ;; ;; also automatically launch a view on the generated documentation
+	    ;; (start-process-shell-command "Browse Doxygen" nil 
+	    ;; 				 (concat "firefox " 
+	    ;; 					 "file://" doxygen-html-index-file))
+	    )
+	  ;; a message in case of error
+	  (message "doxygen.conf not found, no documentation generated !")
+	  )
+    )
+  )
 
 
 
@@ -720,6 +787,14 @@ select the source buffer."
 (setq ido-use-filename-at-point nil)
 ;; but the feature is nice, so we might bind it to a diferent key:
 (global-set-key "\C-x\C-g" 'find-file-at-point)
+
+
+;;
+;; Specific project configuration
+;;
+(add-to-list 'load-path "/home/thibauld/Development/wateronmars/wom-experiment")
+(require 'python-django)
+
 
 
 ;; *****************************************************************************

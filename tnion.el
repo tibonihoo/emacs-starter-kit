@@ -1,7 +1,7 @@
 ;;
 ;; Additional customisation on top of the starter-kit's defaults.
 ;;
-;; (c) 2010 Thibauld Nion
+;; (c) 2010-2013 Thibauld Nion
 ;;
 
 ;; Personal info for signatures in code and stuff...
@@ -14,25 +14,42 @@
     (setq backup-directory-alist `(("." . ,(expand-file-name "d:/Perso/emacs/backups"))))
   )
 
-(if (eq system-type 'windows-nt)
-    (progn
-      ;; Set prefered frame size
-      (add-to-list 'default-frame-alist '(height . 59))
-      (add-to-list 'default-frame-alist '(width . 100))
-      (add-to-list 'default-frame-alist '(top + -3))
-      (add-to-list 'default-frame-alist '(left + -1))
-      )
-  (progn
-    ;; for my linux workstation
-    (frame-set-fullscreen-off)
-    (add-to-list 'default-frame-alist '(height . 66))
-    (add-to-list 'default-frame-alist '(width . 281))
-    ))
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize)
+  (exec-path-from-shell-copy-env "PYTHONPATH")
+  )
 
-(if (eq system-type 'windows-nt)
-    (set-face-attribute 'default nil :family "Consolas" :height 105)
-  ;; else use lucida
-  (set-face-attribute 'default nil :family "b&h-lucidatypewriter")
+
+(cond
+ ((eq system-type 'windows-nt)
+  (progn
+    ;; Set prefered frame size
+    (add-to-list 'default-frame-alist '(height . 59))
+    (add-to-list 'default-frame-alist '(width . 100))
+    (add-to-list 'default-frame-alist '(top + -3))
+    (add-to-list 'default-frame-alist '(left + -1))
+    ))
+ ((eq system-type 'darwin)
+  (progn
+       ;; for my linux workstation
+       (frame-set-fullscreen-off)
+       (add-to-list 'default-frame-alist '(height . 80))
+       (add-to-list 'default-frame-alist '(width . 317))
+       ))
+ ((progn
+       ;; for my linux workstation
+       (frame-set-fullscreen-off)
+       (add-to-list 'default-frame-alist '(height . 66))
+       (add-to-list 'default-frame-alist '(width . 281))
+       )
+  ))
+
+(cond
+  ( (eq system-type 'windows-nt)
+    (set-face-attribute 'default nil :family "Consolas" :height 105) )
+  ( (eq system-type 'darwin)
+    (set-face-attribute 'default nil :family "Menlo" :height 130) )
+  ( (set-face-attribute 'default nil :family "b&h-lucidatypewriter") )
   )
 
 ;; read the log of DOP
@@ -94,20 +111,18 @@
              ;; Subgroupiong with the  @name command
              (define-key doxymacs-mode-map "\C-cdn" 
                'doxymacs-insert-subgrouping-comments)
-             ;; ;; semantic
-             ;; (semantic-mode)
-             ;; (semantic-idle-scheduler-mode)
-             ;; (add-to-list 'semanticdb-project-roots "d:/DATA/WORK/Framework-trunk")
-             ;; (add-to-list 'semanticdb-project-roots "d:/DATA/WORK/Framework-2-x")
+             ;; gtags for completion
              (add-to-list 'ac-sources 'ac-source-gtags)
-             (set-compilation-regexp-alist-for-msbuild)
+             (when (eq system-type 'windows-nt)
+               (set-compilation-regexp-alist-for-msbuild)
+               )
              ;; trigger other common coding hooks
              ))
 
 
 (setup-cmake-mode)
 
-(setq  compile-command "cmake -G \"Visual Studio 10 Win64\" -DUTTestImagesPathNetwork=D:/DATA/UTData ../.. && msbuild /p:configuration=release /m:8 Framework.sln && ctest -C release --output-on-failure")
+(setq  compile-command "cmake -G \"Visual Studio 11 Win64\" -DUTTestImagesPathNetwork=D:/DATA/UTData ../.. && msbuild /p:configuration=release /m:8 Framework.sln && ctest -C release --output-on-failure")
 (setq  fill-column 110)
 (setq grep-command "grep -nH --exclude-dir=\\.svn --exclude-dir=build --exclude-dir=Externals -r ")
 
@@ -118,27 +133,44 @@
 ;; -----------------------------------------------------------------------------
 ;; Partly from https://github.com/alexott/emacs-configs/blob/master/rc/emacs-rc-cedet.el
 
+(when (not (eq system-type 'windows-nt))
+  (require 'semantic/bovine/gcc)
+  )
 (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
-;(add-to-list 'semantic-default-submodes 'global-semantic-mru-bookmark-mode)
 (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
-(add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
 ;(add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
 ;; Activate semantic
 (semantic-mode 1)
 (add-to-list 'ac-sources 'ac-source-semantic)
-;; ;; use GLOBAL tag db
-;; (semanticdb-enable-gnu-global-databases 'c-mode t)
+;; use GLOBAL tag db
+(semanticdb-enable-gnu-global-databases 'c-mode t)
 (semanticdb-enable-gnu-global-databases 'c++-mode)
-
 
 ;; EDE
 (require 'ede)
 (global-ede-mode 1)
 (ede-enable-generic-projects)
 
-(defvar ede-project-build-current-build-platform "win64")
-(defvar ede-project-build-current-build-mode "release")
-(defvar ede-project-build-current-test-options "")
+(cond
+ ( (eq system-type 'windows-nt)
+   (progn
+     (setq  compile-command "cmake -G \"Visual Studio 10 Win64\" -DUTTestImagesPathNetwork=D:/DATA/UTData ../.. && msbuild /p:configuration=release /m:8 Framework.sln && ctest -C release --output-on-failure")
+     (setq local-projects-default-path "d:/DATA/WORK/")
+     (setq local-projects-platform-define "WIN32")
+     (defvar ede-project-build-current-build-platform "win64")
+     (defvar ede-project-build-current-build-mode "release")
+     (defvar ede-project-build-current-test-options "")
+     ))
+ ( (eq system-type 'darwin)
+   (progn
+     (setq  compile-command "cmake -G \"Xcode\" -DUTTestImagesPathNetwork=/Volumes/DATA/UTData ../.. && xcodebuild -jobs 8 -project Framework.xcodeproj -configuration Release  && ctest -C Release --output-on-failure")
+     (setq local-projects-default-path "/Volumes/DATA/Development/")
+     (setq local-projects-platform-define "__MACH__")
+     (defvar ede-project-build-current-build-platform "xcode")
+     (defvar ede-project-build-current-build-mode "Release")
+     (defvar ede-project-build-current-test-options "")
+     ))
+ )
 
 (defun generate-framework-cmake-build-command ()  
   "Generates compile string for compiling CMake project"
@@ -150,9 +182,9 @@
          (cmake-generator
           (cond
            ( (string= ede-project-build-current-build-platform "win64")
-             "-G \"Visual Studio 10 Win64\""
+             "-G \"Visual Studio 11 Win64\""
              )
-           ( t
+           ( t ;; use the default
              "")
            ))
          (build-dir-name
@@ -160,11 +192,39 @@
            ( (string= ede-project-build-current-build-platform "win64")
              "visualx64"
              )
+           ( (string= ede-project-build-current-build-platform "win32")
+             "visualx64"
+             ) 
+           ( (string= ede-project-build-current-build-platform "xcode")
+             "xcode"
+             )
            ( t
-             "visualx86")
+             "make")
+           ))
+         (build-cmd
+          (cond
+           ( (eq system-type 'windows-nt)
+             (concat "msbuild /p:configuration=" ede-project-build-current-build-mode " /m:8 Framework.sln")
+             )
+           ( (eq system-type 'darwin)
+             (concat "xcodebuild -jobs 8 -project Framework.xcodeproj -configuration " ede-project-build-current-build-mode)
+             )
+           ( t
+             "")
+           ))
+         (ut-data-path
+          (cond
+           ( (eq system-type 'windows-nt)
+             "D:/DATA/UTData"
+             )
+           ( (eq system-type 'darwin)
+             "/Volumes/DATA/UTData"
+             )
+           ( t
+             "")
            ))
          )
-    (concat "cd " root-dir "/build/ && mkdir " build-dir-name " || cd " build-dir-name " && cmake ../.. " cmake-generator " -DUTTestImagesPathNetwork=D:/DATA/UTData && msbuild /p:configuration=" ede-project-build-current-build-mode " /m:8 Framework.sln")
+    (concat "cd " root-dir "/build/ && mkdir " build-dir-name " || cd " build-dir-name " && cmake ../.. " cmake-generator " -DUTTestImagesPathNetwork=" ut-data-path " && msbuild /p:configuration=" ede-project-build-current-build-mode " /m:8 Framework.sln")
     )
   )
 
@@ -173,50 +233,48 @@
   (concat (generate-framework-cmake-build-command) " && ctest -C " ede-project-build-current-build-mode " --output-on-failure " ede-project-build-current-test-options)
   )
 
-(ede-cpp-root-project "Framework-trunk"
-                      :name "Framework-trunk"
-                :file "d:/DATA/WORK/Framework-trunk/CMakeLists.txt"
-                :include-path '("/include"
-                                "/src/Correction/include"
-                                "/src/Foundation/include"
-                                )
-                :local-variables (list
-                                  (cons 'compile-command 'generate-framework-cmake-build-command)
-                                  (cons 'compile-and-test-command 'generate-framework-cmake-build-and-test-command))
-                :system-include-path '("c:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include")
-                :spp-table '(("WIN32" . "")
-                             ("BOOST_TEST_DYN_LINK" . "")))
 
+(setq ede-projects-names-lists (concat dotfiles-dir "ede-projects-names.el"))
+(if (file-exists-p ede-projects-names-lists)
+    (load ede-projects-names-lists)
+  (setq ede-cpp-projects-names (list))
+  )
 
-
-(ede-cpp-root-project "Framework-3.5.x"
-                      :name "Framework-3.5.x"
-                      :file "d:/DATA/WORK/Framework-3.5.x/CMakeLists.txt"
-                      :include-path '("/include"
-                                      "/src/Correction/include"
-                                      "/src/Foundation/include"
-                                      )
-                      :local-variables (list
-                                        (cons 'compile-command 'generate-framework-cmake-build-command)
-                                        (cons 'compile-and-test-command 'generate-framework-cmake-build-and-test-command))
-                      :system-include-path '("c:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include")
-                      :spp-table '(("WIN32" . "")
-                                   ("BOOST_TEST_DYN_LINK" . "")))
-
-
-(ede-cpp-root-project "Framework-3.x"
-                      :name "Framework-3.x"
-                      :file "d:/DATA/WORK/Framework-3.x/CMakeLists.txt"
-                      :include-path '("/include"
-                                      "/src/Correction/include"
-                                      "/src/Foundation/include"
-                                      )
-                      :local-variables (list
-                                        (cons 'compile-command 'generate-framework-cmake-build-command)
-                                        (cons 'compile-and-test-command 'generate-framework-cmake-build-and-test-command))
-                      :system-include-path '("c:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include")
-                      :spp-table '(("WIN32" . "")
-                                   ("BOOST_TEST_DYN_LINK" . "")))
+(loop for name in ede-cpp-projects-names do
+      (ede-cpp-root-project name
+                            :file (concat local-projects-default-path name "/CMakeLists.txt")
+                            :include-path '("/include"
+                                            "/src"
+                                            "/src/Correction/include"
+                                            "/src/Foundation/include"
+                                            "/src/Correction/src"
+                                            "/src/Foundation/src"
+                                            "/Externals/boost_src"
+                                            "/Externals/gtest_src/include"
+                                            "/Externals/lcms_src/include"
+                                            "/Externals/libdng_src/include" 
+                                            "/Externals/libjpeg_src/include"
+                                            "/Externals/liblua_src/include" 
+                                            "/Externals/libpng_src/include" 
+                                            "/Externals/libtiff_src/include"
+                                            "/Externals/libxmp_src/include" 
+                                            "/Externals/libzlib_src/include"
+                                            "/Externals/openCL_src/include" 
+                                            "/Externals/qt_lib/include"     
+                                            "/Externals/sqlite3_src/include"
+                                            "/Externals/tclap_src/include"
+                                            "/UnitTests"
+                                            )
+                            :local-variables (list
+                                              (cons 'compile-command 'generate-framework-cmake-build-command)
+                                              (cons 'compile-and-test-command 'generate-framework-cmake-build-and-test-command)
+                                              )
+                            :spp-table `( (,local-projects-platform-define "")
+                                          ("BOOST_TEST_DYN_LINK" . "")
+                                          ("REGISTER_DEFAULT_CORRECTIONS" . "")
+                                          )
+                            )
+      )
 
 
 ;; from https://github.com/alexott/emacs-configs/blob/master/rc/emacs-rc-cedet.el
@@ -279,8 +337,66 @@
     (compile compile-command))
   )
 
+;; A list of const containing (file-name root-dir)
+(setq gtags-file-targets '())
+(setq gtags-running-process nil)
 
 
+(defun gtags-process-sentinel (process event)
+  "Sentinel called when a gtags process changes status, and in
+charge of poping the next item of gtags targets."
+  (if (or
+         (string-equal event "finished\n")    
+         (string-equal event "killed\n")
+         )
+      ( (setq gtags-running-process nil)
+        (gtags-run-against-next-target) )
+    (message (format "Unexpected even for gtags process: '%s'" event))
+    )
+  )
+
+(defun gtags-run-against-next-target ()
+  "Run gtags on the next file listed in gtags-file-targets"
+  (when gtags-file-targets
+    (let*
+        (
+         (current-target (car gtags-file-targets))
+         (gtags-args (if (car current-target) (concat "--single-update " (car current-target)) ""))
+         (current-working-directory (car (cdr current-target)))
+         )
+      (setq gtags-file-targets (cdr gtags-file-targets))
+      (setq gtags-running-process (start-process-shell-command "GTAGS update" nil (concat "cd " current-working-directory " && gtags " gtags-args)))
+      (set-process-sentinel gtags-running-process 'gtags-process-sentinel)
+      )
+    )
+  )
+
+(defun update-gtags-for-ede-project ()
+  "Update the gtag file of EDE project."
+  (interactive)
+  (let* (
+         (current-dir (file-name-directory
+                       (or (buffer-file-name (current-buffer)) default-directory)))
+         (prj (ede-current-project current-dir))
+         (current-project-root-dir (ede-project-root-directory prj))
+         (current-file-name (buffer-file-name))
+         )
+    (when (not gtags-file-targets)
+      (setq gtags-file-targets (list))
+      )
+    (add-to-list 'gtags-file-targets (list current-file-name current-project-root-dir))
+    (when (not gtags-running-process)
+      (gtags-run-against-next-target)
+      )
+    )
+  )
+
+(add-hook 'c-mode-common-hook
+          (lambda () 
+            (add-hook 'after-save-hook 'update-gtags-for-ede-project nil 'make-it-local))
+          )
+
+(setq flymake-gui-warnings-enabled nil)
 
 ;; (custom-set-variables
 ;;  ;; custom-set-variables was added by Custom.

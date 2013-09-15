@@ -1,12 +1,12 @@
-;;; init.el --- Where all the magic begins
-;;
-;; Part of the Emacs Starter Kit
-;;
-;; This is the first thing to get loaded.
-;;
-;; "Emacs outshines all other editing software in approximately the
-;; same way that the noonday sun does the stars. It is not just bigger
-;; and brighter; it simply makes everything else vanish."
+;;; init.el --- Where all the magic begins 
+;; 
+;; Part of the Emacs Starter Kit 
+;; 
+;; This is the first thing to get loaded. 
+;; 
+;; "Emacs outshines all other editing software in approximately the 
+;; same way that the noonday sun does the stars. It is not just bigger 
+;; and brighter; it simply makes everything else vanish." 
 ;; -Neal Stephenson, "In the Beginning was the Command Line"
 
 ;; Turn off mouse interface early in startup to avoid momentary display
@@ -55,7 +55,8 @@
 (add-to-list 'package-archives 
              '("marmalade" .
                "http://marmalade-repo.org/packages/"))
-(add-to-list '("melpa" .
+(add-to-list 'package-archives
+             '("melpa" .
                "http://melpa.milkbox.net/packages/"))
 (package-initialize)
 (require 'starter-kit-elpa)
