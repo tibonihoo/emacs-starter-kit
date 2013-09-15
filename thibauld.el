@@ -17,12 +17,12 @@
  ( (eq system-type 'windows-nt)
    (set-face-attribute 'default nil :family "Consolas" :height 105)
    )
- ( (memq window-system '(mac ns))
+ ( (eq system-type 'darwin)
    (set-face-attribute 'default nil :family "Menlo")
    )
  ( t
    ;; else use lucida
-   (set-face-attribute 'default nil :family "Monospace")
+   (set-face-attribute 'default nil :family "Monospace" :height 105)
   )
 )
 
