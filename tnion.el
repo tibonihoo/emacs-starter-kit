@@ -9,6 +9,7 @@
 (set 'user-mail-address "tnion@dxo.com")
 ;; Work context
 (defvar my-work-context "DO")
+(setq initial-major-mode 'org-mode)
 
 (if (eq system-type 'windows-nt)
     (setq backup-directory-alist `(("." . ,(expand-file-name "d:/Perso/emacs/backups"))))
@@ -111,8 +112,9 @@
              ;; Subgroupiong with the  @name command
              (define-key doxymacs-mode-map "\C-cdn" 
                'doxymacs-insert-subgrouping-comments)
-             ;; gtags for completion
-             (add-to-list 'ac-sources 'ac-source-gtags)
+             ;; ;; gtags for completion
+             ;; (add-to-list 'ac-sources 'ac-source-gtags)
+             (delete 'ac-source-gtags ac-sources)
              (when (eq system-type 'windows-nt)
                (set-compilation-regexp-alist-for-msbuild)
                )
@@ -122,10 +124,8 @@
 
 (setup-cmake-mode)
 
-(setq  compile-command "cmake -G \"Visual Studio 11 Win64\" -DUTTestImagesPathNetwork=D:/DATA/UTData ../.. && msbuild /p:configuration=release /m:8 Framework.sln && ctest -C release --output-on-failure")
 (setq  fill-column 110)
-(setq grep-command "grep -nH --exclude-dir=\\.svn --exclude-dir=build --exclude-dir=Externals -r ")
-
+(setq grep-command "grep -nH --exclude-dir=Externals -Ir ")
 
 
 ;; -----------------------------------------------------------------------------
@@ -136,6 +136,7 @@
 (when (not (eq system-type 'windows-nt))
   (require 'semantic/bovine/gcc)
   )
+
 (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
 (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
 ;(add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
@@ -154,8 +155,9 @@
 (cond
  ( (eq system-type 'windows-nt)
    (progn
-     (setq  compile-command "cmake -G \"Visual Studio 11 Win64\" -DUTTestImagesPathNetwork=D:/DATA/UTData ../.. && msbuild /p:configuration=release /m:8 Framework.sln && ctest -C release --output-on-failure")
-     (setq local-projects-default-path "d:/DATA/WORK/")
+     (setq  compile-command "cmake -G \"Visual Studio 14 Win64\" ../.. && cmake --build . --target FWKUnitTests")
+     (setq root-of-build-directories "P:/Builds")     
+     (setq local-projects-default-path "d:/DATA/WORK/tnion/Development/")
      (setq local-projects-platform-define "WIN32")
      (defvar ede-project-build-current-build-platform "win64")
      (defvar ede-project-build-current-build-mode "release")
@@ -163,8 +165,9 @@
      ))
  ( (eq system-type 'darwin)
    (progn
-     (setq  compile-command "cmake -G \"Xcode\" -DUTTestImagesPathNetwork=/Volumes/DATA/UTData ../.. && xcodebuild -jobs 8 -project Framework.xcodeproj -configuration Release  && ctest -C Release --output-on-failure")
-     (setq local-projects-default-path "/Volumes/DATA/Development/")
+     (setq  compile-command "cmake -G \"Xcode\" ../.. && cmake --build . --target FWKUnitTests")
+     (setq root-of-build-directories "/Volumes/DATA/Builds")     
+     (setq local-projects-default-path "/Users/tnion/Development/")
      (setq local-projects-platform-define "__MACH__")
      (defvar ede-project-build-current-build-platform "xcode")
      (defvar ede-project-build-current-build-mode "Release")
@@ -179,10 +182,17 @@
                        (or (buffer-file-name (current-buffer)) default-directory)))
          (prj (ede-current-project current-dir))
          (root-dir (ede-project-root-directory prj))
+         (project-name (file-name-base (directory-file-name root-dir)))
          (cmake-generator
           (cond
            ( (string= ede-project-build-current-build-platform "win64")
              "-G \"Visual Studio 11 Win64\""
+             )
+           ( (string= ede-project-build-current-build-platform "win32")
+             "-G \"Visual Studio 11\""
+             )
+           ( (string= ede-project-build-current-build-platform "xcode")
+             "-G \"Xcode\""
              )
            ( t ;; use the default
              "")
@@ -193,7 +203,7 @@
              "visualx64"
              )
            ( (string= ede-project-build-current-build-platform "win32")
-             "visualx64"
+             "visualx86"
              ) 
            ( (string= ede-project-build-current-build-platform "xcode")
              "xcode"
@@ -212,25 +222,22 @@
            ( t
              "")
            ))
-         (ut-data-path
-          (cond
-           ( (eq system-type 'windows-nt)
-             "D:/DATA/UTData"
-             )
-           ( (eq system-type 'darwin)
-             "/Volumes/DATA/UTData"
-             )
-           ( t
-             "")
-           ))
          )
-    (concat "cd " root-dir "/build/ && mkdir " build-dir-name " || cd " build-dir-name " && cmake ../.. " cmake-generator " -DUTTestImagesPathNetwork=" ut-data-path " && msbuild /p:configuration=" ede-project-build-current-build-mode " /m:8 Framework.sln")
+    (concat "cd " root-of-build-directories " && cd " project-name " && mkdir " build-dir-name " || cd " build-dir-name " && cmake " root-dir " " cmake-generator " && " build-cmd)
     )
   )
 
 (defun generate-framework-cmake-build-and-test-command ()
   "Generates compile string for compiling CMake project and running unit-test on it"
-  (concat (generate-framework-cmake-build-command) " && ctest -C " ede-project-build-current-build-mode " --output-on-failure " ede-project-build-current-test-options)
+  (let* (
+         (current-dir (file-name-directory
+                       (or (buffer-file-name (current-buffer)) default-directory)))
+         (prj (ede-current-project current-dir))
+         (root-dir (ede-project-root-directory prj))
+         (project-name (file-name-base (directory-file-name root-dir)))
+         )
+    (concat (generate-framework-cmake-build-command) " && ctest -C " ede-project-build-current-build-mode " --output-on-failure " ede-project-build-current-test-options)
+    )
   )
 
 
@@ -398,6 +405,25 @@ charge of poping the next item of gtags targets."
 
 (setq flymake-gui-warnings-enabled nil)
 
+
+(require 'god-mode)
+(god-mode-all)
+(global-set-key (kbd "<f6>") 'god-mode-all)
+(defun god-mode-update-mode-line ()
+  (let ((limited-colors-p (> 257 (length (defined-colors)))))
+    (cond (god-local-mode (progn
+                            (set-face-background 'mode-line (if limited-colors-p "purple" "#8b2500"))
+                            (set-face-background 'mode-line-inactive (if limited-colors-p "purple" "#8b2500"))))
+          (t (progn
+               (set-face-background 'mode-line (if limited-colors-p "black" "black"))
+               (set-face-background 'mode-line-inactive (if limited-colors-p "black" "black")))))))
+(add-hook 'god-mode-enabled-hook 'god-mode-update-mode-line)
+(add-hook 'god-mode-disabled-hook 'god-mode-update-mode-line)
+
+
+(require 'iedit)
+(global-set-key (kbd "C-*") 'iedit-mode)
+
 ;; (custom-set-variables
 ;;  ;; custom-set-variables was added by Custom.
 ;;  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -417,3 +443,8 @@ charge of poping the next item of gtags targets."
 
 ;; Always at the end !
 (require 'tibonihoo_common)
+
+
+
+
+
