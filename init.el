@@ -9,6 +9,14 @@
 ;; and brighter; it simply makes everything else vanish." 
 ;; -Neal Stephenson, "In the Beginning was the Command Line"
 
+(defadvice display-warning
+    (around no-warn-.emacs.d-in-load-path (type message &rest unused) activate)
+  "Ignore the warning about the `.emacs.d' directory being in `load-path'."
+  (unless (and (eq type 'initialization)
+               (string-prefix-p "Your `load-path' seems to contain\nyour `.emacs.d' directory"
+                                message t))
+    ad-do-it))
+
 ;; Turn off mouse interface early in startup to avoid momentary display
 ;; You really don't need these; trust me.
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
