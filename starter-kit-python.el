@@ -81,6 +81,16 @@
      ))
 (add-hook 'python-mode-hook 'flymake-mode)
 
+(defun django-wrap-trans (b e)
+  "Wrapper some text in the trans tag"
+  (interactive "r")
+  (save-restriction
+    (narrow-to-region b e)
+    (goto-char (point-min))
+    (insert "{% trans \"")
+    (goto-char (point-max))
+    (insert "\" %}")))
+(global-set-key (kbd "C-c C-l") 'django-wrap-trans)
 
 
 (provide 'starter-kit-python)
